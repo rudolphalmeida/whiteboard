@@ -102,8 +102,289 @@ Shared whiteboards allow multiple users to draw simultaneously on a canvas. The 
 
 #### System Architecture
 
-To Be Done
+The API is available online right now! Use it by sending your request to **api.boyang.website/whiteboard/{URI}**
+
+There are six URIs you may request. Details are given below.
+
+1. **Root**
+    ```
+    URL: http://api.boyang.website/whiteboard
+    Method: GET
+    Parameter(s): NULL
+    Expected Return: {"message":"Hi there!"}
+    ```
+    The only function of this URI is to help you get your hands on RESTful API (or test your network connection). Your HTTP Request Headers may look like this:
+    ```
+    GET /whiteboard HTTP/1.1
+    Host: api.boyang.website
+    User-Agent: PostmanRuntime/7.17.1
+    Accept: */*
+    Accept-Encoding: gzip, deflate
+    Connection: keep-alive
+    ```
+    The Response Headers should like this:
+    ```
+    HTTP/1.1 200 OK
+    Date: Sun, 29 Sep 2019 13:26:48 GMT
+    Content-Type: application/json
+    Content-Length: 23
+    Connection: keep-alive
+    Server: cloudflare
+    CF-RAY: 51de4a7b2911df1c-MEL
+    ```
+    Tips:
+
+    + You should never put anything into the HTTP request body when you use GET method.
+    + You could quickly determine if your request was successful by status code (200 OK)
+    + The format of message from the server would always be JSON (except the access token).  
+
+2. **AccessToken**
+    ```
+    URL: http://api.boyang.website/whiteboard/accesstoken
+    Method: GET
+    Parameter(s): User (in Request Headers), Code (in Request Headers)
+    Expected Return: Access-Token (in Response Headers), {"message":"Successfully obtained accesstoken"}
+    ```
+    This URI is to enforce access control by generating [access token](https://en.wikipedia.org/wiki/Access_token). You are supposed to request for this URI before requesting for others (except Root). Just put two parameters into HTTP Request Headers: 
+
+    + User: Username of current user.
+    + Code: 471e61cd2878317b204b878dfc918d2b (which is the 32 bit MD5 hash of "frameless").
+
+    For example, if you send request on behalf of user "test", Your HTTP Request Headers may look like this:
+    ```
+    GET /whiteboard/accesstoken HTTP/1.1
+    Host: api.boyang.website
+    Code: 471e61cd2878317b204b878dfc918d2b
+    User: test
+    User-Agent: PostmanRuntime/7.17.1
+    Accept: */*
+    Accept-Encoding: gzip, deflate
+    Connection: keep-alive
+    ```
+    The Response Headers should like this:
+    ```
+    HTTP/1.1 200 OK
+    Date: Sun, 29 Sep 2019 13:26:48 GMT
+    Content-Type: application/json
+    Content-Length: 47
+    Connection: keep-alive
+    Access-Token: 40ba5aeca40e537c0933e1bc287fb3d1
+    Server: cloudflare
+    CF-RAY: 51deda9a8d29df95-MEL
+    ```
+    You should read and save the Access-Token. Every time you request for other URIs you need to put it into HTTP Request Headers to identify yourself. If not, you would get an error message:
+    ```
+    401 Unauthorized
+    {"message\":"Not a legal user"}
+    ```
+    Error message you may get:
+    ```
+    401 Unauthorized
+    {"message":"Code is not correct"}
+    ```
+
+    Tips:
+
+    + You could always get a new access token with the right code and if you request for a new one, it would be different every time for every user. So you do not need to save it permanently.
+    + Why do this? Please refer to [OAuth 2.0](https://oauth.net/2/).
+
+3. **Manager**
+
+    *\@GET* : To find out who is the manager right now
+    ```
+    URL: http://api.boyang.website/whiteboard/manager
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": managername, "message":"Request completed successfully"}
+    ```
+
+    Default manager is "null". In this case, "null" is regarded as a reserved word in the server and it could not be an user name.
+
+    *\@POST*: To register the current user as the manager
+    ```
+    URL: http://api.boyang.website/whiteboard/manager
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    405 Method Not Allowed
+    {"message":"Manager already exists"}
+    ```
+
+    *\@DELETE*: To unregister the current user as the manager
+    ```
+    URL: http://api.boyang.website/whiteboard/manager
+    Method: DELETE
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Only manager can delete manager"}
+
+    405 Method Not Allowed
+    {"message":"Manager does not exist"}
+    ```
+
+    Tips:
+
+    + At the very start, nobody is manager. But once a user register himself or herself as the manager, others could not register as the manager.
+
+4. **OnlineUsers**
+
+    *\@GET*: To get the list of all online users
+    ```
+    URL: http://api.boyang.website/whiteboard/onlineusers
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": [onlineuserslist], "message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    404 Not Found
+    {"result": "null", "message":"No online user exists"}
+    ```
+
+    *\@POST*: To register the current user as an online user
+    ```
+    URL: http://api.boyang.website/whiteboard/onlineusers
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+
+    *\@DELETE*: To unregister the current user as an online user
+    ```
+    URL: http://api.boyang.website/whiteboard/onlineusers
+    Method: DELETE
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+
+    Tips:
+
+    + After you get the access token, just make yourself online. When you close the application, remember to make yourself offline.
+
+5. **ActiveUsers**
+
+    *\@GET*: To get the list of all active users
+    ```
+    URL: http://api.boyang.website/whiteboard/activeusers
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": [activeuserslist], "message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    404 Not Found
+    {"result": "null", "message":"No active user exists"}
+    ```
+
+    *\@POST*: To register some user as an active user
+    ```
+    URL: http://api.boyang.website/whiteboard/activeusers/{user}
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers), user (in URL)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Only manager can activate users"}
+    ```
+
+    *\@DELETE*: To unregister some user as an active user
+    ```
+    URL: http://api.boyang.website/whiteboard/activeusers/{user}
+    Method: DELETE
+    Parameter(s): Access-Token (in Request Headers), user (in URL)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Only manager can kick users"}
+    ```
+
+    Tips:
+
+    + For the user who is manager, he or she could active (let them join in the whiteboard) or deactive (kick them) others.
+    + For the user who is not manager, he or she could deactive himself or herself (leave the whiteboard).
+    + Manager should active himself or herself after becoming the manager.
+
+6. **Canvas**
+
+    *\@GET*: To get all data of the canvas
+    ```
+    URL: http://api.boyang.website/whiteboard/canvas
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": {yourjsonhere}, "message":"Request completed successfully"} or
+                     {"result": null, "message":"Request completed successfully"}
+    ```
+
+    Default canvas is "null". That means no canvas exists. Manager could initialize one by using POST method.
+
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
+    *\@POST*: To initialize a canvas
+    ```
+    URL: http://api.boyang.website/whiteboard/canvas
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers), user (in URL)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+
+    403 Forbidden
+    {"message":"Only manager can create new cavans"}
+    ```
+
+    *\@PUT*: To update the canvas
+    ```
+    URL: http://api.boyang.website/whiteboard/canvas
+    Method: PUT
+    Parameter(s): Access-Token (in Request Headers), {your jsons tring} (in Request Body)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
+    *\@DELETE*: To delete the canvas
+    ```
+    URL: http://api.boyang.website/whiteboard/canvas
+    Method: DELETE
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+
+    403 Forbidden
+    {"message":"Only manager can delete canvas"}
+    ```
+
+    Tips:
+
+    + Manager could get, post, put and delete the canvas.
+    + Other active users could only get and put the canvas.
+
 
 <br>
 
-**Have fun and start from now!**
+**Have fun and keep going!**

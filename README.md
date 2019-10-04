@@ -104,7 +104,7 @@ Shared whiteboards allow multiple users to draw simultaneously on a canvas. The 
 
 The API is available online right now! Use it by sending your request to **api.boyang.website/whiteboard/{URI}**
 
-There are six URIs you may request. Details are given below.
+There are nine URIs you may request. Details are given below.
 
 1. **Root**
     ```
@@ -322,7 +322,7 @@ There are six URIs you may request. Details are given below.
     URL: http://api.boyang.website/whiteboard/canvas
     Method: GET
     Parameter(s): Access-Token (in Request Headers)
-    Expected Return: {"result": {yourjsonhere}, "message":"Request completed successfully"} or
+    Expected Return: {"result": [{"id": 1, "request": {yourjsonhere}}, {"id": 2, "request": {yourjsonhere}}, ...], "message":"Request completed successfully"} or
                      {"result": null, "message":"Request completed successfully"}
     ```
 
@@ -334,11 +334,28 @@ There are six URIs you may request. Details are given below.
     {"message":"Not an active user"}
     ```
 
+    *\@GET*: To get updated data of the canvas
+    ```
+    URL: http://api.boyang.website/whiteboard/canvas/{mid}
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers), mid (in URL)
+    Expected Return: {"result": [{"id": mid + 1, "request": {yourjsonhere}}, {"id": mid + 2, "request": {yourjsonhere}}, ...], "message":"Request completed successfully"} or
+                     {"result": null, "message":"Request completed successfully"}
+    ```
+
+    This method would only return messages whose message id are behind "mid".
+
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
     *\@POST*: To initialize a canvas
     ```
     URL: http://api.boyang.website/whiteboard/canvas
     Method: POST
-    Parameter(s): Access-Token (in Request Headers), user (in URL)
+    Parameter(s): Access-Token (in Request Headers)
     Expected Return: {"message":"Request completed successfully"}
     ```
     Error message you may get:
@@ -384,6 +401,101 @@ There are six URIs you may request. Details are given below.
     + Manager could get, post, put and delete the canvas.
     + Other active users could only get and put the canvas.
 
+7. **WaitingUsers**
+
+    *\@GET*: To get the list of all users who are waiting for manager's approval
+    ```
+    URL: http://api.boyang.website/whiteboard/waitingusers
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": [waitinguserslist], "message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    404 Not Found
+    {"result": "null", "message":"No online user exists"}
+    ```
+
+    *\@POST*: To register the current user as a waiting user
+    ```
+    URL: http://api.boyang.website/whiteboard/waitingusers
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    *\@DELETE*: To reject some user to be an active user
+    ```
+    URL: http://api.boyang.website/whiteboard/waitingusers/{user}
+    Method: DELETE
+    Parameter(s): Access-Token (in Request Headers), user (in URL)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Only manager can reject users"}
+    ```
+
+8. **UserState**
+
+    *\@GET*: To get the state of current user
+    ```
+    URL: http://api.boyang.website/whiteboard/userstate
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": "null|active|waiting|rejected|kicked", "message":"Request completed successfully"}
+    ```
+
+9. **ChatMessages**
+
+    *\@GET*: To get all chat messages
+    ```
+    URL: http://api.boyang.website/whiteboard/chatmessages
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers)
+    Expected Return: {"result": [{"id": 1, "request": {yourjsonhere}}, {"id": 2, "request": {yourjsonhere}}, ...], "message":"Request completed successfully"} or
+                     {"result": null, "message":"Request completed successfully"}
+    ```
+
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
+    *\@GET*: To get updated chat messages
+    ```
+    URL: http://api.boyang.website/whiteboard/chatmessages/{cid}
+    Method: GET
+    Parameter(s): Access-Token (in Request Headers), cid (in URL)
+    Expected Return: {"result": [{"id": cid + 1, "request": {yourjsonhere}}, {"id": cid + 2, "request": {yourjsonhere}}, ...], "message":"Request completed successfully"} or
+                     {"result": null, "message":"Request completed successfully"}
+    ```
+
+    This method would only return messages whose message id are behind "cid".
+
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
+    *\@POST*: To add a new chat message
+    ```
+    URL: http://api.boyang.website/whiteboard/chatmessages
+    Method: POST
+    Parameter(s): Access-Token (in Request Headers), {your jsons tring} (in Request Body)
+    Expected Return: {"message":"Request completed successfully"}
+    ```
+    Error message you may get:
+    ```
+    403 Forbidden
+    {"message":"Not an active user"}
+    ```
+
+    Tips:
+
+    + The chat messages could be regarded as a part of canvas. In other words, canvas should exist if you want to post new chat messages. If canvas is deleted, chat messages would be cleared too.
 
 <br>
 

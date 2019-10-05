@@ -1,20 +1,15 @@
 package com.framelessboard;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class DrawController {
 
@@ -108,8 +103,8 @@ public class DrawController {
     private DrawTool currentTool = null;
 
     // Coordinates for drawing
-    double startX, startY;
-    double endX, endY;
+    private double startX, startY;
+    private double endX, endY;
 
     private String currentFileName = null;
     private Path currentFilePath = null;
@@ -192,6 +187,7 @@ public class DrawController {
             if (currentTool == null) return;
 
             if (currentTool == DrawTool.ERASER) {
+                // TODO: Use background color
                 gc.setStroke(Color.WHITE);
                 gc.setFill(Color.WHITE);
                 gc.fillOval(event.getX(), event.getY(), strokeWidthInput.getValue(), strokeWidthInput.getValue());
@@ -219,6 +215,9 @@ public class DrawController {
                     gc.setStroke(drawColor.getValue());
                     gc.setFill(drawColor.getValue());
 
+                    // A circle is also an oval with both axes of length diameter
+                    // Oval requires the top-left corner which we can get by doing
+                    // subtracting radius from the center
                     gc.fillOval(startX - radius, startY - radius, radius * 2, radius * 2);
 
                     break;
@@ -233,29 +232,37 @@ public class DrawController {
                     break;
                 }
                 case RECTANGLE: {
-                    alignStartEnd(event);
+                    endX = event.getX();
+                    endY = event.getY();
+                    alignStartEnd();
                     gc.setStroke(drawColor.getValue());
                     gc.setFill(drawColor.getValue());
                     gc.fillRect(startX, startY, endX - startX, endY - startY);
-                    startX = endX = startY = endY = 0.0;
+                    startX = endX = startY = endY = 0.0; // Reset start and end
                     break;
                 }
                 case ELLIPSE: {
-                    alignStartEnd(event);
+                    endX = event.getX();
+                    endY = event.getY();
+                    alignStartEnd();
                     gc.setStroke(drawColor.getValue());
                     gc.setFill(drawColor.getValue());
                     gc.fillOval(startX, startY, endX - startX, endY - startY);
-                    startX = endX = startY = endY = 0.0;
+                    startX = endX = startY = endY = 0.0; // Reset start and end
                     break;
                 }
             }
         });
     }
 
-    private void alignStartEnd(MouseEvent event) {
-        endX = event.getX();
-        endY = event.getY();
-
+    /*
+     * Shape primitives like rectangle, ellipse require start to be the top-left
+     * corner and end to be the bottom-right corner. However depending on how the
+     * user drags the mouse they might end up at incorrect corners. This function
+     * moves start and end to their proper position while maintaining the same polygon
+     * */
+    private void alignStartEnd() {
+        // When the user drags towards top-left
         if (startX > endX && startY > endY) {
             // Swap start with end
             double temp = startX;
@@ -265,18 +272,16 @@ public class DrawController {
             temp = startY;
             startY = endY;
             endY = temp;
-        } else if (startX < endX && startY > endY) {
-            double newStartY = endY;
-            double newEndY = startY;
-
-            startY = newStartY;
-            endY = newEndY;
-        } else if (startX > endX && startY < endY) {
-            double newStartX = endX;
-            double newEndX = startX;
-
-            startX = newStartX;
-            endX = newEndX;
+        } else if (startX < endX && startY > endY) { // When user drags top-right
+            // Swap only the y co-ordinate
+            double temp = endY;
+            endY = startY;
+            startY = temp;
+        } else if (startX > endX && startY < endY) { // When user drags bottom-left
+            // Swap only the x co-ordinate
+            double temp = endX;
+            endX = startX;
+            startX = temp;
         }
     }
 

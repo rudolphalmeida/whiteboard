@@ -117,6 +117,9 @@ public class DrawController {
         file = null;
         modifiedAfterLastSave = false;
 
+        Stage stage = (Stage) drawCanvas.getScene().getWindow();
+        stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
+
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.WHITE);
         gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
@@ -124,6 +127,9 @@ public class DrawController {
 
     public void onClose(ActionEvent actionEvent) {
         onSave(actionEvent);
+        file = null;
+        Stage stage = (Stage) drawCanvas.getScene().getWindow();
+        stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
         try {
             switchToLogin();
         } catch (IOException e) {
@@ -144,6 +150,8 @@ public class DrawController {
                     System.out.println("Error! Cannot write image...");
                 }
                 modifiedAfterLastSave = false;
+                Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
             } else {
                 onSaveAs(actionEvent);
             }
@@ -233,6 +241,8 @@ public class DrawController {
                     String text = textToDrawInput.getText();
                     gc.fillText(text, x, y);
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case ERASER: {
@@ -241,6 +251,8 @@ public class DrawController {
                     gc.setFill(Color.WHITE);
                     gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case FREEHAND: {
@@ -248,6 +260,8 @@ public class DrawController {
                     gc.setFill(drawColor.getValue());
                     gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
             }
@@ -301,6 +315,8 @@ public class DrawController {
                     gc.fillOval(startX - radius, startY - radius, radius * 2, radius * 2);
 
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case LINE: {
@@ -311,6 +327,8 @@ public class DrawController {
                     startX = endX = startY = endY = 0.0;
 
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case RECTANGLE: {
@@ -323,6 +341,8 @@ public class DrawController {
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case ELLIPSE: {
@@ -335,6 +355,8 @@ public class DrawController {
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
             }

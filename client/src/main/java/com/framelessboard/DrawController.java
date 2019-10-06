@@ -1,17 +1,33 @@
 package com.framelessboard;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class DrawController {
+
+    public MenuItem menuNew;
+    public MenuItem menuClose;
+    public MenuItem menuSave;
+    public MenuItem menuSaveAs;
+    public MenuItem menuQuit;
+
 
     @FXML
     private ToggleButton rectangleToggle;
@@ -96,6 +112,64 @@ public class DrawController {
         }
     }
 
+    public void onNew(ActionEvent actionEvent) {
+        onSave(actionEvent);
+        file = null;
+        modifiedAfterLastSave = false;
+
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.WHITE);
+        gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
+    }
+
+    public void onClose(ActionEvent actionEvent) {
+        onSave(actionEvent);
+        try {
+            switchToLogin();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onSave(ActionEvent actionEvent) {
+        if (modifiedAfterLastSave) {
+            if (file != null) {
+                try {
+                    WritableImage writableImage = new WritableImage((int) drawCanvas.getWidth(), (int) drawCanvas.getHeight());
+                    drawCanvas.snapshot(null, writableImage);
+                    RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+                    ImageIO.write(renderedImage, "png", file);
+                } catch (IOException ex) {
+                    // TODO: Show dialog box here
+                    System.out.println("Error! Cannot write image...");
+                }
+                modifiedAfterLastSave = false;
+            } else {
+                onSaveAs(actionEvent);
+            }
+        }
+    }
+
+    public void onSaveAs(ActionEvent actionEvent) {
+        if (modifiedAfterLastSave) {
+            // Create file chooser with only PNG file selection
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            // Show file dialog
+            file = fileChooser.showSaveDialog(drawCanvas.getScene().getWindow());
+
+            onSave(actionEvent);
+        }
+    }
+
+    public void onQuit(ActionEvent actionEvent) {
+        onSave(actionEvent);
+        Stage stage = (Stage) drawCanvas.getScene().getWindow();
+        stage.close();
+    }
+
     enum DrawTool {
         TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE
     }
@@ -106,11 +180,14 @@ public class DrawController {
     private double startX, startY;
     private double endX, endY;
 
-    private String currentFileName = null;
-    private Path currentFilePath = null;
+    private File file = null;
+    private boolean modifiedAfterLastSave = false;
 
     @FXML
     private void initialize() {
+        // Keyboard shortcuts
+        menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+
         // ToggleGroup allows us to only select one object from the draw tools
         ToggleGroup objectGroup = new ToggleGroup();
         textToggle.setToggleGroup(objectGroup);
@@ -155,6 +232,7 @@ public class DrawController {
                     gc.setFont(new Font(strokeWidthInput.getValue()));
                     String text = textToDrawInput.getText();
                     gc.fillText(text, x, y);
+                    modifiedAfterLastSave = true;
                     break;
                 }
                 case ERASER: {
@@ -162,12 +240,14 @@ public class DrawController {
                     gc.setStroke(Color.WHITE);
                     gc.setFill(Color.WHITE);
                     gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                    modifiedAfterLastSave = true;
                     break;
                 }
                 case FREEHAND: {
                     gc.setStroke(drawColor.getValue());
                     gc.setFill(drawColor.getValue());
                     gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                    modifiedAfterLastSave = true;
                     break;
                 }
             }
@@ -220,6 +300,7 @@ public class DrawController {
                     // subtracting radius from the center
                     gc.fillOval(startX - radius, startY - radius, radius * 2, radius * 2);
 
+                    modifiedAfterLastSave = true;
                     break;
                 }
                 case LINE: {
@@ -229,6 +310,7 @@ public class DrawController {
                     gc.strokeLine(startX, startY, event.getX(), event.getY());
                     startX = endX = startY = endY = 0.0;
 
+                    modifiedAfterLastSave = true;
                     break;
                 }
                 case RECTANGLE: {
@@ -239,6 +321,8 @@ public class DrawController {
                     gc.setFill(drawColor.getValue());
                     gc.fillRect(startX, startY, endX - startX, endY - startY);
                     startX = endX = startY = endY = 0.0; // Reset start and end
+
+                    modifiedAfterLastSave = true;
                     break;
                 }
                 case ELLIPSE: {
@@ -249,6 +333,8 @@ public class DrawController {
                     gc.setFill(drawColor.getValue());
                     gc.fillOval(startX, startY, endX - startX, endY - startY);
                     startX = endX = startY = endY = 0.0; // Reset start and end
+
+                    modifiedAfterLastSave = true;
                     break;
                 }
             }

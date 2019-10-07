@@ -50,6 +50,9 @@ public class DrawController {
     private ToggleButton textToggle;
 
     @FXML
+    private ToggleButton fillToggle;
+
+    @FXML
     private ColorPicker drawColor;
 
     @FXML
@@ -103,6 +106,11 @@ public class DrawController {
         toggleCurrent(DrawTool.ERASER);
     }
 
+    public void toggleDrawFill(ActionEvent actionEvent) {
+        textToDrawInput.setDisable(true);
+        toggleCurrent(DrawTool.FILL);
+    }
+
     public void toggleDrawText(ActionEvent actionEvent) {
         if (currentTool == DrawTool.TEXT) {
             textToDrawInput.setDisable(true);
@@ -116,21 +124,21 @@ public class DrawController {
     /*
      * Displays an alert box asking for confirmation to save the current open file
      * */
-    private boolean confirmSave(ActionEvent actionEvent) {
+    private boolean confirmSave() {
         if (!modifiedAfterLastSave) return false;
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Save?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         alert.showAndWait();
 
         if (alert.getResult() == ButtonType.YES) {
-            onSave(actionEvent);
+            save();
         } else return alert.getResult() == ButtonType.CANCEL;
 
         return false;
     }
 
     public void onNew(ActionEvent actionEvent) {
-        if (confirmSave(actionEvent)) return;
+        if (confirmSave()) return;
 
         // Reset attributes
         file = null;
@@ -153,7 +161,7 @@ public class DrawController {
     }
 
     public void onClose(ActionEvent actionEvent) {
-        if (confirmSave(actionEvent)) return;
+        if (confirmSave()) return;
 
         file = null;
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -167,7 +175,7 @@ public class DrawController {
 
     private boolean fileSelectError = false;
 
-    public void onSave(ActionEvent actionEvent) {
+    private void save() {
         if (modifiedAfterLastSave && !fileSelectError) {
             if (file != null) {
                 try {
@@ -182,7 +190,7 @@ public class DrawController {
                 Stage stage = (Stage) drawCanvas.getScene().getWindow();
                 stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
             } else {
-                onSaveAs(actionEvent);
+                saveAs();
             }
         } else {
             // This happens if user clicked on Cancel in onSaveAs()
@@ -191,7 +199,7 @@ public class DrawController {
         }
     }
 
-    public void onSaveAs(ActionEvent actionEvent) {
+    private void saveAs() {
         if (modifiedAfterLastSave) {
             // Create file chooser with only PNG file selection
             FileChooser fileChooser = new FileChooser();
@@ -205,19 +213,27 @@ public class DrawController {
             // a file, we want to avoid going into an infinite loop of FileChoosers
             fileSelectError = file == null;
 
-            onSave(actionEvent);
+            save();
         }
     }
 
+    public void onSave(ActionEvent actionEvent) {
+        save();
+    }
+
+    public void onSaveAs(ActionEvent actionEvent) {
+        saveAs();
+    }
+
     public void onQuit(ActionEvent actionEvent) {
-        if (confirmSave(actionEvent)) return;
+        if (confirmSave()) return;
 
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.close();
     }
 
     enum DrawTool {
-        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE
+        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
     }
 
     private DrawTool currentTool = null;
@@ -231,6 +247,19 @@ public class DrawController {
 
     @FXML
     private void initialize() {
+        // TODO: Exit handler
+        // On exit handler
+        // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
+//        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
+//            if (oldScene == null && newScene != null) {
+//                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> {
+//                    newWindow.setOnCloseRequest(event -> {
+//                        save();
+//                    });
+//                }));
+//            }
+//        }));
+
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
         menuNew.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
@@ -248,6 +277,7 @@ public class DrawController {
         lineToggle.setToggleGroup(objectGroup);
         rectangleToggle.setToggleGroup(objectGroup);
         circleToggle.setToggleGroup(objectGroup);
+        fillToggle.setToggleGroup(objectGroup);
 
         // StrokeWidth
         strokeWidthInput.setMin(1.0);
@@ -307,6 +337,15 @@ public class DrawController {
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
+                case FILL: {
+                    // Run FloodFill in separate thread
+                    FloodFill ff = new FloodFill(gc, drawCanvas, event, drawColor.getValue());
+                    ff.start();
+                    modifiedAfterLastSave = true;
+                    Stage stage = (Stage) drawCanvas.getScene().getWindow();
+                    stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
+                    break;
+                }
             }
         });
 
@@ -343,6 +382,7 @@ public class DrawController {
                 case TEXT:
                 case ERASER:
                 case FREEHAND:
+                case FILL:
                     break;
                 case CIRCLE: {
                     double outerX = event.getX();

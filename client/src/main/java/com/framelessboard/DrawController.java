@@ -62,6 +62,8 @@ public class DrawController {
     @FXML
     private Canvas drawCanvas;
 
+    private ToggleGroup objectGroup;
+
     private GraphicsContext gc;
 
     private void toggleCurrent(DrawTool tool) {
@@ -112,21 +114,48 @@ public class DrawController {
         }
     }
 
+    /*
+     * Displays an alert box asking for confirmation to save the current open file
+     * */
+    private boolean confirmSave(ActionEvent actionEvent) {
+        if (!modifiedAfterLastSave) return false;
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Save?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+        alert.showAndWait();
+
+        if (alert.getResult() == ButtonType.YES) {
+            onSave(actionEvent);
+        } else return alert.getResult() == ButtonType.CANCEL;
+
+        return false;
+    }
+
     public void onNew(ActionEvent actionEvent) {
-        onSave(actionEvent);
+        if (confirmSave(actionEvent)) return;
+
+        // Reset attributes
         file = null;
         modifiedAfterLastSave = false;
+        drawColor.setValue(Color.WHITE);
+        Toggle current = objectGroup.getSelectedToggle();
+        if (current != null) {
+            current.setSelected(false);
+        }
+        strokeWidthInput.setValue(strokeWidthInput.getMin());
 
+        // Change the window title
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
 
+        // Reset canvas
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.WHITE);
         gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
     }
 
     public void onClose(ActionEvent actionEvent) {
-        onSave(actionEvent);
+        if (confirmSave(actionEvent)) return;
+
         file = null;
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
@@ -146,8 +175,7 @@ public class DrawController {
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
                     ImageIO.write(renderedImage, "png", file);
                 } catch (IOException ex) {
-                    // TODO: Show dialog box here
-                    System.out.println("Error! Cannot write image...");
+                    new Alert(Alert.AlertType.ERROR, "Error! Cannot write image...").showAndWait();
                 }
                 modifiedAfterLastSave = false;
                 Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -173,7 +201,8 @@ public class DrawController {
     }
 
     public void onQuit(ActionEvent actionEvent) {
-        onSave(actionEvent);
+        if (confirmSave(actionEvent)) return;
+
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.close();
     }
@@ -197,7 +226,7 @@ public class DrawController {
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
         // ToggleGroup allows us to only select one object from the draw tools
-        ToggleGroup objectGroup = new ToggleGroup();
+        objectGroup = new ToggleGroup();
         textToggle.setToggleGroup(objectGroup);
         eraserToggle.setToggleGroup(objectGroup);
         freeToggle.setToggleGroup(objectGroup);

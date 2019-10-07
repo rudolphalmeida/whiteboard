@@ -28,7 +28,6 @@ public class DrawController {
     public MenuItem menuSaveAs;
     public MenuItem menuQuit;
 
-
     @FXML
     private ToggleButton rectangleToggle;
 
@@ -166,8 +165,10 @@ public class DrawController {
         }
     }
 
+    private boolean fileSelectError = false;
+
     public void onSave(ActionEvent actionEvent) {
-        if (modifiedAfterLastSave) {
+        if (modifiedAfterLastSave && !fileSelectError) {
             if (file != null) {
                 try {
                     WritableImage writableImage = new WritableImage((int) drawCanvas.getWidth(), (int) drawCanvas.getHeight());
@@ -183,6 +184,10 @@ public class DrawController {
             } else {
                 onSaveAs(actionEvent);
             }
+        } else {
+            // This happens if user clicked on Cancel in onSaveAs()
+            // Break the loop here
+            fileSelectError = false;
         }
     }
 
@@ -195,6 +200,10 @@ public class DrawController {
 
             // Show file dialog
             file = fileChooser.showSaveDialog(drawCanvas.getScene().getWindow());
+
+            // If the user clicked on cancel or there was an error in selecting
+            // a file, we want to avoid going into an infinite loop of FileChoosers
+            fileSelectError = file == null;
 
             onSave(actionEvent);
         }

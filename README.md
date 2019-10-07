@@ -39,14 +39,14 @@ Shared whiteboards allow multiple users to draw simultaneously on a canvas. The 
 
 + GUI Elements:
     - Shapes
-        * [ ] Line
-        * [ ] Circle
-        * [ ] Rectangle
-        * [ ] Oval
-    - [ ] Free Draw
-    - [ ] Erase
-    - [ ] Text Inputting (Allow user to type text everywhere inside the whiteboard)
-    - [ ] Color Select (At least 16 colors)
+        * [x] Line
+        * [x] Circle
+        * [x] Rectangle
+        * [x] Oval
+    - [x] Free Draw
+    - [x] Erase
+    - [x] Text Inputting (Allow user to type text everywhere inside the whiteboard)
+    - [x] Color Select (At least 16 colors)
     - [ ] Chat Window (Text based)
     - File Menu
         * [ ] New

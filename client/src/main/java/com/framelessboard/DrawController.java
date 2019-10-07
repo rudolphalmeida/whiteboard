@@ -224,6 +224,11 @@ public class DrawController {
     private void initialize() {
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        menuNew.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
+        menuSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN));
+        menuClose.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
+        menuQuit.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHIFT_DOWN));
+
 
         // ToggleGroup allows us to only select one object from the draw tools
         objectGroup = new ToggleGroup();
@@ -275,7 +280,7 @@ public class DrawController {
                     break;
                 }
                 case ERASER: {
-                    // TODO: Change this to background color
+                    // TODO: Change this to background color?
                     gc.setStroke(Color.WHITE);
                     gc.setFill(Color.WHITE);
                     gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
@@ -310,7 +315,7 @@ public class DrawController {
             if (currentTool == null) return;
 
             if (currentTool == DrawTool.ERASER) {
-                // TODO: Use background color
+                // TODO: Use background color?
                 gc.setStroke(Color.WHITE);
                 gc.setFill(Color.WHITE);
                 gc.fillOval(event.getX(), event.getY(), strokeWidthInput.getValue(), strokeWidthInput.getValue());
@@ -339,7 +344,7 @@ public class DrawController {
                     gc.setFill(drawColor.getValue());
 
                     // A circle is also an oval with both axes of length diameter
-                    // Oval requires the top-left corner which we can get by doing
+                    // Oval requires the top-left corner which we can get by
                     // subtracting radius from the center
                     gc.fillOval(startX - radius, startY - radius, radius * 2, radius * 2);
 

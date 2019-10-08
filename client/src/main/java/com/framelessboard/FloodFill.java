@@ -77,11 +77,15 @@ class FloodFill extends Thread {
 
         if (targetColor != replacementColor) {
             floodFill(pixelReader, pixelWriter);
+            /*
+             * Possible explanation for blurring of the image when using this function:
+             * https://stackoverflow.com/questions/33380306/how-can-i-draw-images-into-javafx-canvas-without-blur-aliasing-in-a-given-area
+             * */
             gc.drawImage(canvasAsImage, 0, 0);
         }
     }
 
-    private class Node {
+    private static class Node {
         int x, y;
 
         Node(int x, int y) {

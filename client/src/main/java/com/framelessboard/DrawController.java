@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -27,6 +28,7 @@ public class DrawController {
     public MenuItem menuSave;
     public MenuItem menuSaveAs;
     public MenuItem menuQuit;
+    public MenuItem menuOpen;
 
     @FXML
     private ToggleButton rectangleToggle;
@@ -160,6 +162,25 @@ public class DrawController {
         gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
     }
 
+    public void onOpen(ActionEvent actionEvent) {
+        // Open a new workspace
+        onNew(actionEvent);
+
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        // Show file dialog
+        file = fileChooser.showOpenDialog(drawCanvas.getScene().getWindow());
+
+        if (file == null) {
+            new Alert(Alert.AlertType.ERROR, "Error! Invalid selection...").showAndWait();
+        }
+
+        Image image = new Image(file.toURI().toString());
+        gc.drawImage(image, 0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
+    }
+
     public void onClose(ActionEvent actionEvent) {
         if (confirmSave()) return;
 
@@ -266,6 +287,7 @@ public class DrawController {
         menuSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN));
         menuClose.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
         menuQuit.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHIFT_DOWN));
+        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 
         // ToggleGroup allows us to only select one object from the draw tools

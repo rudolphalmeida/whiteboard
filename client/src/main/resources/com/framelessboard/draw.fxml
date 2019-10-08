@@ -36,7 +36,7 @@
     </MenuBar>
     <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
-        <AnchorPane>
+          <AnchorPane maxWidth="250.0" prefWidth="250.0">
                <children>
                   <SplitPane dividerPositions="0.49635036496350365" orientation="VERTICAL" prefHeight="566.0" prefWidth="226.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
@@ -83,11 +83,17 @@
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <ColorPicker fx:id="drawColor" layoutX="39.0" layoutY="14.0" />
-                                          <Label layoutX="14.0" layoutY="55.0" text="Stroke Width" />
-                                          <Slider fx:id="strokeWidthInput" layoutX="14.0" layoutY="80.0" prefHeight="16.0" prefWidth="190.0" />
-                                          <Label layoutX="14.0" layoutY="117.0" text="Text" />
-                                          <TextField fx:id="textToDrawInput" layoutX="14.0" layoutY="134.0" prefHeight="27.0" prefWidth="184.0" />
+                                           <ColorPicker fx:id="drawColor" layoutX="39.0" layoutY="14.0"
+                                                        AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+                                           <Label layoutX="14.0" layoutY="55.0" text="Stroke Width"
+                                                  AnchorPane.leftAnchor="0.0"/>
+                                           <Slider fx:id="strokeWidthInput" layoutX="14.0" layoutY="80.0"
+                                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+                                           <Label layoutX="14.0" layoutY="108.0" text="Text"
+                                                  AnchorPane.leftAnchor="0.0"/>
+                                           <TextField fx:id="textToDrawInput" layoutX="14.0" layoutY="134.0"
+                                                      prefHeight="27.0" prefWidth="184.0" AnchorPane.leftAnchor="0.0"
+                                                      AnchorPane.rightAnchor="0.0"/>
                                        </children></AnchorPane>
                                 </content>
                               </TitledPane>
@@ -99,7 +105,7 @@
         </AnchorPane>
         <ScrollPane prefHeight="-1.0" prefWidth="-1.0">
           <content>
-              <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="600.0" prefWidth="600.0">
+              <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0">
                      <children>
                          <Canvas fx:id="drawCanvas" height="600.0" layoutX="84.0" layoutY="123.0" width="600.0"
                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -107,7 +113,7 @@
                      </children></AnchorPane>
           </content>
         </ScrollPane>
-        <AnchorPane>
+          <AnchorPane maxWidth="250.0" prefWidth="250.0">
                <children>
                   <Accordion layoutX="-11.0" layoutY="149.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <panes>

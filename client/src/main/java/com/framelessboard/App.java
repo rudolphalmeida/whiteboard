@@ -19,6 +19,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("draw"));
         stage.setTitle("FramelessBoard");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }

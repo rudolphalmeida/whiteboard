@@ -28,7 +28,7 @@ public class CustomDrawing {
     */
     
     // Constructor for shapes - lines, rectangles, ellipses and circles.
-    CustomDrawing(String drawType, String color, double startX, int startY, int endX, int endY) {
+    CustomDrawing(String drawType, String color, double startX, double startY, double endX, double endY) {
         drawing.put("Object", drawType);
         JSONObject attributes = new JSONObject();
         attributes.put("color", color);
@@ -48,7 +48,7 @@ public class CustomDrawing {
     }
     
     // Constructor for text drawings.
-    CustomDrawing(String drawType, String color, int startX, int startY, String text) {
+    CustomDrawing(String drawType, String color, double startX, double startY, String text) {
         drawing.put("Object", drawType);
         JSONObject attributes = new JSONObject();
         attributes.put("color", color);

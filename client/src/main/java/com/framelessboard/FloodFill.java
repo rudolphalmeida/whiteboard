@@ -5,7 +5,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import java.util.LinkedList;
@@ -19,10 +18,10 @@ class FloodFill extends Thread {
     private int startX, startY; // Click points
     private GraphicsContext gc; // The graphics context
 
-    FloodFill(GraphicsContext gc, Canvas canvas, MouseEvent event, Color replacementColor) {
+    FloodFill(GraphicsContext gc, Canvas canvas, double x, double y, Color replacementColor) {
         this.canvasAsImage = getWriteableImage(canvas);
-        this.startX = (int) event.getX();
-        this.startY = (int) event.getY();
+        this.startX = (int) x;
+        this.startY = (int) y;
         this.replacementColor = replacementColor;
         this.gc = gc;
     }

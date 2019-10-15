@@ -63,6 +63,9 @@ public class DrawController {
     private TextField textToDrawInput;
 
     @FXML
+    private CheckBox toggleFilling;
+
+    @FXML
     private Canvas drawCanvas;
 
     private ToggleGroup objectGroup;
@@ -70,57 +73,67 @@ public class DrawController {
     private GraphicsContext gc;
     private Artist artist;
 
-    private void toggleCurrent(Artist.DrawTool tool) {
-        if (artist.getCurrentTool() == tool) {
-            artist.setCurrentTool(null);
+    enum DrawTool {
+        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
+    }
+
+    private DrawTool currentTool;
+
+    private void toggleCurrent(DrawTool tool) {
+        if (currentTool == tool) {
+            currentTool = null;
         } else {
-            artist.setCurrentTool(tool);
+            currentTool = tool;
         }
     }
 
     public void toggleDrawRectangle(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.RECTANGLE);
+        toggleCurrent(DrawTool.RECTANGLE);
     }
 
     public void toggleDrawCircle(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.CIRCLE);
+        toggleCurrent(DrawTool.CIRCLE);
     }
 
     public void toggleDrawLine(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.LINE);
+        toggleCurrent(DrawTool.LINE);
     }
 
     public void toggleDrawEllipse(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.ELLIPSE);
+        toggleCurrent(DrawTool.ELLIPSE);
     }
 
     public void toggleDrawFree(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.FREEHAND);
+        toggleCurrent(DrawTool.FREEHAND);
     }
 
     public void toggleDrawEraser(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.ERASER);
+        toggleCurrent(DrawTool.ERASER);
     }
 
     public void toggleDrawFill(ActionEvent actionEvent) {
         textToDrawInput.setDisable(true);
-        toggleCurrent(Artist.DrawTool.FILL);
+        toggleCurrent(DrawTool.FILL);
     }
 
     public void toggleDrawText(ActionEvent actionEvent) {
-        if (artist.getCurrentTool() == Artist.DrawTool.TEXT) {
+        if (currentTool == DrawTool.TEXT) {
             textToDrawInput.setDisable(true);
-            artist.setCurrentTool(null);
+            currentTool = null;
         } else {
             textToDrawInput.setDisable(false);
-            artist.setCurrentTool(Artist.DrawTool.TEXT);
+            currentTool = DrawTool.TEXT;
         }
+    }
+
+    public void toggleFilling() {
+        artist.toggleFilling();
     }
 
     /*
@@ -146,6 +159,7 @@ public class DrawController {
         file = null;
         modifiedAfterLastSave = false;
         drawColor.setValue(Color.WHITE);
+        toggleFilling.setSelected(false);
         Toggle current = objectGroup.getSelectedToggle();
         if (current != null) {
             current.setSelected(false);
@@ -261,7 +275,6 @@ public class DrawController {
 
     @FXML
     private void initialize() {
-        // TODO: Exit handler
         // On exit handler
         // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
 //        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
@@ -310,7 +323,7 @@ public class DrawController {
         // Event handlers for canvas
         // Click Event
         drawCanvas.setOnMouseClicked(event -> {
-            if (artist.getCurrentTool() == null) {
+            if (currentTool == null) {
                 return;
             }
 
@@ -318,7 +331,7 @@ public class DrawController {
             double x = event.getX();
             double y = event.getY();
 
-            switch (artist.getCurrentTool()) {
+            switch (currentTool) {
                 case ELLIPSE:
                 case LINE:
                 case CIRCLE:
@@ -362,7 +375,7 @@ public class DrawController {
         // Drag event
         // Begin drag
         drawCanvas.setOnMousePressed(event -> {
-            if (artist.getCurrentTool() == null) return;
+            if (currentTool == null) return;
 
             startX = endX = event.getX();
             startY = endY = event.getY();
@@ -370,20 +383,20 @@ public class DrawController {
         });
 
         drawCanvas.setOnMouseDragged(event -> {
-            if (artist.getCurrentTool() == null) return;
+            if (currentTool == null) return;
 
-            if (artist.getCurrentTool() == Artist.DrawTool.ERASER) {
+            if (currentTool == DrawTool.ERASER) {
                 artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
-            } else if (artist.getCurrentTool() == Artist.DrawTool.FREEHAND) {
+            } else if (currentTool == DrawTool.FREEHAND) {
                 artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
             }
         });
 
         // drag exited
         drawCanvas.setOnMouseReleased(event -> {
-            if (artist.getCurrentTool() == null) return;
+            if (currentTool == null) return;
 
-            switch (artist.getCurrentTool()) {
+            switch (currentTool) {
                 case TEXT:
                 case ERASER:
                 case FREEHAND:
@@ -402,7 +415,7 @@ public class DrawController {
                     break;
                 }
                 case LINE: {
-                    artist.drawLine(startX, startY, endX, endY, strokeWidthInput.getValue(), drawColor.getValue());
+                    artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
 
                     startX = endX = startY = endY = 0.0;
 

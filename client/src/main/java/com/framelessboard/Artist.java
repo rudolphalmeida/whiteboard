@@ -8,12 +8,10 @@ import javafx.scene.text.Font;
 
 public class Artist {
 
-    enum DrawTool {
-        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
-    }
-
     private Canvas canvas;
     private GraphicsContext gc;
+
+    private boolean fill = false;
 
     Artist(Canvas canvas, GraphicsContext gc) {
         this.canvas = canvas;
@@ -28,20 +26,14 @@ public class Artist {
         return gc;
     }
 
-    private DrawTool currentTool = null;
-
-    DrawTool getCurrentTool() {
-        return currentTool;
-    }
-
-    void setCurrentTool(DrawTool currentTool) {
-        this.currentTool = currentTool;
-    }
-
     void clearCanvas() {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.WHITE);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
+    void toggleFilling() {
+        fill = !fill;
     }
 
     void drawImage(Image image) {
@@ -81,14 +73,18 @@ public class Artist {
         // A circle is also an oval with both axes of length diameter
         // Oval requires the top-left corner which we can get by
         // subtracting radius from the center
-        gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+        if (fill) {
+            gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+        } else {
+            gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
+        }
     }
 
     void drawLine(double startX, double startY, double endX, double endY, double thickness, Color color) {
+        gc.setLineWidth(thickness);
+
         gc.setStroke(color);
         gc.setFill(color);
-
-        gc.setLineWidth(thickness);
 
         gc.strokeLine(startX, startY, endX, endY);
     }
@@ -97,13 +93,21 @@ public class Artist {
         gc.setStroke(color);
         gc.setFill(color);
 
-        gc.fillRect(x, y, width, height);
+        if (fill) {
+            gc.fillRect(x, y, width, height);
+        } else {
+            gc.strokeRect(x, y, width, height);
+        }
     }
 
     void drawEllipse(double x, double y, double axis1, double axis2, Color color) {
         gc.setStroke(color);
         gc.setFill(color);
 
-        gc.fillOval(x, y, axis1, axis2);
+        if (fill) {
+            gc.fillOval(x, y, axis1, axis2);
+        } else {
+            gc.strokeOval(x, y, axis1, axis2);
+        }
     }
 }

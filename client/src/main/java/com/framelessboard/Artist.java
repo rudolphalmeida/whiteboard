@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-public class Artist {
+class Artist {
 
     private Canvas canvas;
     private GraphicsContext gc;
@@ -14,14 +14,6 @@ public class Artist {
     Artist(Canvas canvas, GraphicsContext gc) {
         this.canvas = canvas;
         this.gc = gc;
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
-    public GraphicsContext getGc() {
-        return gc;
     }
 
     void clearCanvas() {
@@ -60,9 +52,11 @@ public class Artist {
         ff.start();
     }
 
-    void drawCircle(double x, double y, double radius, Color color, boolean fill) {
+    void drawCircle(double x, double y, double radius, Color color, boolean fill, double strokeWidth) {
         gc.setStroke(color);
         gc.setFill(color);
+
+        gc.setLineWidth(strokeWidth);
 
         // A circle is also an oval with both axes of length diameter
         // Oval requires the top-left corner which we can get by
@@ -83,9 +77,11 @@ public class Artist {
         gc.strokeLine(startX, startY, endX, endY);
     }
 
-    void drawRectangle(double x, double y, double width, double height, Color color, boolean fill) {
+    void drawRectangle(double x, double y, double width, double height, Color color, boolean fill, double strokeWidth) {
         gc.setStroke(color);
         gc.setFill(color);
+
+        gc.setLineWidth(strokeWidth);
 
         if (fill) {
             gc.fillRect(x, y, width, height);
@@ -94,9 +90,11 @@ public class Artist {
         }
     }
 
-    void drawEllipse(double x, double y, double axis1, double axis2, Color color, boolean fill) {
+    void drawEllipse(double x, double y, double axis1, double axis2, Color color, boolean fill, double strokeWidth) {
         gc.setStroke(color);
         gc.setFill(color);
+
+        gc.setLineWidth(strokeWidth);
 
         if (fill) {
             gc.fillOval(x, y, axis1, axis2);

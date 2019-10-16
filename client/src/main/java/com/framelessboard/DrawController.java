@@ -401,7 +401,7 @@ public class DrawController {
                     double outerY = event.getY();
                     double radius = distance(startX, startY, outerX, outerY);
 
-                    artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected());
+                    artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -423,7 +423,7 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected());
+                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -436,7 +436,7 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected());
+                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;

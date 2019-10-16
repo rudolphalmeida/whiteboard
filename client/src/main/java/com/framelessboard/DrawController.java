@@ -12,7 +12,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -64,11 +63,21 @@ public class DrawController {
     private TextField textToDrawInput;
 
     @FXML
+    private CheckBox toggleFilling;
+
+    @FXML
     private Canvas drawCanvas;
 
     private ToggleGroup objectGroup;
 
     private GraphicsContext gc;
+    private Artist artist;
+
+    enum DrawTool {
+        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
+    }
+
+    private DrawTool currentTool;
 
     private void toggleCurrent(DrawTool tool) {
         if (currentTool == tool) {
@@ -146,6 +155,7 @@ public class DrawController {
         file = null;
         modifiedAfterLastSave = false;
         drawColor.setValue(Color.WHITE);
+        toggleFilling.setSelected(false);
         Toggle current = objectGroup.getSelectedToggle();
         if (current != null) {
             current.setSelected(false);
@@ -157,9 +167,7 @@ public class DrawController {
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
 
         // Reset canvas
-        gc.setFill(Color.WHITE);
-        gc.setStroke(Color.WHITE);
-        gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
+        artist.clearCanvas();
     }
 
     public void onOpen(ActionEvent actionEvent) {
@@ -175,10 +183,11 @@ public class DrawController {
 
         if (file == null) {
             new Alert(Alert.AlertType.ERROR, "Error! Invalid selection...").showAndWait();
+            return;
         }
 
         Image image = new Image(file.toURI().toString());
-        gc.drawImage(image, 0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
+        artist.drawImage(image);
     }
 
     public void onClose(ActionEvent actionEvent) {
@@ -253,12 +262,6 @@ public class DrawController {
         stage.close();
     }
 
-    enum DrawTool {
-        TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
-    }
-
-    private DrawTool currentTool = null;
-
     // Coordinates for drawing
     private double startX, startY;
     private double endX, endY;
@@ -268,18 +271,15 @@ public class DrawController {
 
     @FXML
     private void initialize() {
-        // TODO: Exit handler
         // On exit handler
         // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
-//        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
-//            if (oldScene == null && newScene != null) {
-//                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> {
-//                    newWindow.setOnCloseRequest(event -> {
-//                        save();
-//                    });
-//                }));
-//            }
-//        }));
+        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
+            if (oldScene == null && newScene != null) {
+                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> newWindow.setOnCloseRequest(event -> {
+                    save();
+                })));
+            }
+        }));
 
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
@@ -311,6 +311,9 @@ public class DrawController {
         gc.setStroke(Color.WHITE);
         gc.fillRect(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
 
+        // Artist
+        artist = new Artist(drawCanvas, gc);
+
         // Event handlers for canvas
         // Click Event
         drawCanvas.setOnMouseClicked(event -> {
@@ -329,40 +332,32 @@ public class DrawController {
                 case RECTANGLE:
                     break;
                 case TEXT: {
-                    // TODO: Choose between stroke and fill?
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-                    gc.setFont(new Font(strokeWidthInput.getValue()));
-                    String text = textToDrawInput.getText();
-                    gc.fillText(text, x, y);
+                    artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
+
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case ERASER: {
-                    // TODO: Change this to background color?
-                    gc.setStroke(Color.WHITE);
-                    gc.setFill(Color.WHITE);
-                    gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                    artist.erase(x, y, strokeWidthInput.getValue());
+
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case FREEHAND: {
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-                    gc.fillOval(x, y, strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                    artist.drawFreeHand(x, y, strokeWidthInput.getValue(), drawColor.getValue());
+
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
                     break;
                 }
                 case FILL: {
-                    // Run FloodFill in separate thread
-                    FloodFill ff = new FloodFill(gc, drawCanvas, event, drawColor.getValue());
-                    ff.start();
+                    artist.floodFill(x, y, drawColor.getValue());
+
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
@@ -385,14 +380,9 @@ public class DrawController {
             if (currentTool == null) return;
 
             if (currentTool == DrawTool.ERASER) {
-                // TODO: Use background color?
-                gc.setStroke(Color.WHITE);
-                gc.setFill(Color.WHITE);
-                gc.fillOval(event.getX(), event.getY(), strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
             } else if (currentTool == DrawTool.FREEHAND) {
-                gc.setStroke(drawColor.getValue());
-                gc.setFill(drawColor.getValue());
-                gc.fillOval(event.getX(), event.getY(), strokeWidthInput.getValue(), strokeWidthInput.getValue());
+                artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
             }
         });
 
@@ -411,13 +401,7 @@ public class DrawController {
                     double outerY = event.getY();
                     double radius = distance(startX, startY, outerX, outerY);
 
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-
-                    // A circle is also an oval with both axes of length diameter
-                    // Oval requires the top-left corner which we can get by
-                    // subtracting radius from the center
-                    gc.fillOval(startX - radius, startY - radius, radius * 2, radius * 2);
+                    artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -425,10 +409,8 @@ public class DrawController {
                     break;
                 }
                 case LINE: {
-                    gc.setLineWidth(strokeWidthInput.getValue());
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-                    gc.strokeLine(startX, startY, event.getX(), event.getY());
+                    artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+
                     startX = endX = startY = endY = 0.0;
 
                     modifiedAfterLastSave = true;
@@ -440,9 +422,8 @@ public class DrawController {
                     endX = event.getX();
                     endY = event.getY();
                     alignStartEnd();
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-                    gc.fillRect(startX, startY, endX - startX, endY - startY);
+
+                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -454,9 +435,8 @@ public class DrawController {
                     endX = event.getX();
                     endY = event.getY();
                     alignStartEnd();
-                    gc.setStroke(drawColor.getValue());
-                    gc.setFill(drawColor.getValue());
-                    gc.fillOval(startX, startY, endX - startX, endY - startY);
+
+                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;

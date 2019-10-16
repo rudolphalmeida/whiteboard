@@ -94,6 +94,8 @@
                                            <TextField fx:id="textToDrawInput" layoutX="14.0" layoutY="134.0"
                                                       prefHeight="27.0" prefWidth="184.0" AnchorPane.leftAnchor="0.0"
                                                       AnchorPane.rightAnchor="0.0"/>
+                                           <CheckBox fx:id="toggleFilling" layoutX="7.0" layoutY="173.0"
+                                                     mnemonicParsing="false" text="Fill"/>
                                        </children></AnchorPane>
                                 </content>
                               </TitledPane>

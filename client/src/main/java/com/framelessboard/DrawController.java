@@ -132,10 +132,6 @@ public class DrawController {
         }
     }
 
-    public void toggleFilling() {
-        artist.toggleFilling();
-    }
-
     /*
      * Displays an alert box asking for confirmation to save the current open file
      * */
@@ -277,15 +273,13 @@ public class DrawController {
     private void initialize() {
         // On exit handler
         // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
-//        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
-//            if (oldScene == null && newScene != null) {
-//                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> {
-//                    newWindow.setOnCloseRequest(event -> {
-//                        save();
-//                    });
-//                }));
-//            }
-//        }));
+        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
+            if (oldScene == null && newScene != null) {
+                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> newWindow.setOnCloseRequest(event -> {
+                    save();
+                })));
+            }
+        }));
 
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
@@ -407,7 +401,7 @@ public class DrawController {
                     double outerY = event.getY();
                     double radius = distance(startX, startY, outerX, outerY);
 
-                    artist.drawCircle(startX, startY, radius, drawColor.getValue());
+                    artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -429,7 +423,7 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue());
+                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -442,7 +436,7 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue());
+                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;

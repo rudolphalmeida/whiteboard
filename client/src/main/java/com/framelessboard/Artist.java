@@ -11,8 +11,6 @@ public class Artist {
     private Canvas canvas;
     private GraphicsContext gc;
 
-    private boolean fill = false;
-
     Artist(Canvas canvas, GraphicsContext gc) {
         this.canvas = canvas;
         this.gc = gc;
@@ -30,10 +28,6 @@ public class Artist {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.WHITE);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-    }
-
-    void toggleFilling() {
-        fill = !fill;
     }
 
     void drawImage(Image image) {
@@ -66,7 +60,7 @@ public class Artist {
         ff.start();
     }
 
-    void drawCircle(double x, double y, double radius, Color color) {
+    void drawCircle(double x, double y, double radius, Color color, boolean fill) {
         gc.setStroke(color);
         gc.setFill(color);
 
@@ -89,7 +83,7 @@ public class Artist {
         gc.strokeLine(startX, startY, endX, endY);
     }
 
-    void drawRectangle(double x, double y, double width, double height, Color color) {
+    void drawRectangle(double x, double y, double width, double height, Color color, boolean fill) {
         gc.setStroke(color);
         gc.setFill(color);
 
@@ -100,7 +94,7 @@ public class Artist {
         }
     }
 
-    void drawEllipse(double x, double y, double axis1, double axis2, Color color) {
+    void drawEllipse(double x, double y, double axis1, double axis2, Color color, boolean fill) {
         gc.setStroke(color);
         gc.setFill(color);
 

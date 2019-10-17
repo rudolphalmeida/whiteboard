@@ -73,6 +73,8 @@ public class DrawController {
     private GraphicsContext gc;
     private Artist artist;
 
+    private WritableImage cleanSnapshot = null;
+
     enum DrawTool {
         TEXT, ERASER, FREEHAND, ELLIPSE, LINE, RECTANGLE, CIRCLE, FILL
     }
@@ -314,6 +316,8 @@ public class DrawController {
         // Artist
         artist = new Artist(drawCanvas, gc);
 
+        cleanSnapshot = new WritableImage((int) drawCanvas.getWidth(), (int) drawCanvas.getHeight());
+
         // Event handlers for canvas
         // Click Event
         drawCanvas.setOnMouseClicked(event -> {
@@ -374,15 +378,95 @@ public class DrawController {
             startX = endX = event.getX();
             startY = endY = event.getY();
 
+            cleanSnapshot = drawCanvas.snapshot(null, cleanSnapshot);
+
         });
 
         drawCanvas.setOnMouseDragged(event -> {
             if (currentTool == null) return;
 
-            if (currentTool == DrawTool.ERASER) {
-                artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
-            } else if (currentTool == DrawTool.FREEHAND) {
-                artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+            switch (currentTool) {
+                case ERASER:
+                    artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
+                    break;
+                case FREEHAND:
+                    artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    break;
+                case LINE: {
+                    // Restore previous snapshot
+                    gc.drawImage(cleanSnapshot, 0, 0);
+                    Color color = drawColor.getValue();
+                    // Transparent version of the color
+                    Color transparentColor = new Color(
+                            color.getRed(), color.getGreen(), color.getBlue(), 0.2
+                    );
+
+                    endX = event.getX();
+                    endY = event.getY();
+
+                    artist.drawLine(startX, startY, endX, endY, 1.0, transparentColor);
+                    break;
+                }
+                case RECTANGLE: {
+                    // Save actual drag start coordinates
+                    double tempX = startX;
+                    double tempY = startY;
+
+                    // Go back to clean snapshot
+                    gc.drawImage(cleanSnapshot, 0, 0);
+                    Color color = drawColor.getValue();
+                    // Get a slightly transparent version of the current color
+                    Color transparentColor = new Color(
+                            color.getRed(), color.getGreen(), color.getBlue(), 0.2
+                    );
+
+                    // Draw a rectangle
+                    endX = event.getX();
+                    endY = event.getY();
+                    alignStartEnd();
+                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, transparentColor, false, 1.0);
+
+                    // Restore original start co-ordinates
+                    startX = tempX;
+                    startY = tempY;
+                    break;
+                }
+                case ELLIPSE: {
+                    // Same process as rectangle
+
+                    double tempX = startX;
+                    double tempY = startY;
+
+                    gc.drawImage(cleanSnapshot, 0, 0);
+                    Color color = drawColor.getValue();
+                    Color transparentColor = new Color(
+                            color.getRed(), color.getGreen(), color.getBlue(), 0.2
+                    );
+
+                    endX = event.getX();
+                    endY = event.getY();
+                    alignStartEnd();
+                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, transparentColor, false, 1.0);
+                    startX = tempX;
+                    startY = tempY;
+                    break;
+                }
+                case CIRCLE: {
+                    // Same as rectangle but no need of restoring coordinates here
+
+                    gc.drawImage(cleanSnapshot, 0, 0);
+                    Color color = drawColor.getValue();
+                    Color transparentColor = new Color(
+                            color.getRed(), color.getGreen(), color.getBlue(), 0.2
+                    );
+
+                    endX = event.getX();
+                    endY = event.getY();
+                    double radius = distance(startX, startY, endX, endY);
+
+                    artist.drawCircle(startX, startY, radius, transparentColor, false, 1.0);
+                    break;
+                }
             }
         });
 

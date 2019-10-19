@@ -11,6 +11,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -72,6 +73,10 @@ public class DrawController {
 
     private GraphicsContext gc;
     private Artist artist;
+
+    @FXML
+    private Chat chat;
+
 
     private WritableImage cleanSnapshot = null;
 

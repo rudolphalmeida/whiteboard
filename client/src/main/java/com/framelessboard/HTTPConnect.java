@@ -17,6 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -779,23 +780,7 @@ public class HTTPConnect {
                         currentNumber = canvasResult.getJSONObject(i).getInt("id");
                         String objectType = drawing.getString("Object");
                         JSONObject action = drawing.getJSONObject("Action");
-                        switch (objectType){
-                            case "TEXT":
-                                artist.drawJSONText(action);
-                                break;
-                            case "CIRCLE":
-                                artist.drawJSONCircle(action);
-                                break;
-                            case "LINE":
-                                artist.drawJSONLine(action);
-                                break;
-                            case "RECTANGLE":
-                                artist.drawJSONRectangle(action);
-                                break;
-                            case "ELLIPSE":
-                                artist.drawJSONEllipse(action);
-                                break;
-                        }
+                        drawAction(objectType, action);
                         System.out.println(drawing);
                     }
                 }
@@ -804,6 +789,28 @@ public class HTTPConnect {
         };
         //thread.start();
         return thread;
+    }
+
+    public void drawAction(String objectType, JSONObject action){
+        switch (objectType){
+            case "TEXT":
+                artist.drawJSONText(action);
+                break;
+            case "CIRCLE":
+                artist.drawJSONCircle(action);
+                break;
+            case "LINE":
+                artist.drawJSONLine(action);
+                break;
+            case "RECTANGLE":
+                artist.drawJSONRectangle(action);
+                break;
+            case "ELLIPSE":
+                artist.drawJSONEllipse(action);
+                break;
+            case "Image":
+                artist.drawJSONImage(action);
+        }
     }
 
 
@@ -815,11 +822,24 @@ public class HTTPConnect {
         myHTTPConnect.postCanvas();
         myHTTPConnect.getCanvas();
         JSONObject testJSON = new JSONObject();
-        testJSON.put("test", "hello");
-        //myHTTPConnect.sendText(testJSON);
+        testJSON.put("Object", "Image");
+        JSONObject testAction = new JSONObject();
+        pngBase64 png = new pngBase64();
+        String test = null;
+        try {
+            test = png.pngToString("C:/Users/IF/Pictures/fbk.png");
+            System.out.println(test);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        testAction.put("image", test);
+        testJSON.put("Action", testAction);
+        //System.out.println(testAction);
+        myHTTPConnect.sendCanvas(testJSON);
+        System.out.println("Canvas");
         myHTTPConnect.getCanvas();
-        myHTTPConnect.postChatMessages(testJSON);
-        myHTTPConnect.getChatMessages();
+//        myHTTPConnect.postChatMessages(testJSON);
+//        myHTTPConnect.getChatMessages();
 
         //myHTTPConnect.deleteCanvas();
 

@@ -44,7 +44,7 @@ public class pngBase64 {
         try{
             test = png.pngToString("C:/Users/IF/Pictures/wallhaven.png");
             System.out.println(test);
-            png.decodeToImage(test, "C:/Users/IF/Pictures/test.png");
+            png.decodeToImage(test, "background.png");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

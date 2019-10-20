@@ -7,6 +7,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import org.json.JSONObject;
 
+import java.io.File;
+
 class Artist {
 
     private Canvas canvas;
@@ -25,6 +27,15 @@ class Artist {
 
     void drawImage(Image image) {
         gc.drawImage(image, 0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
+    void drawJSONImage(JSONObject action){
+        String imageString = action.getString("image");
+        pngBase64 png = new pngBase64();
+        png.decodeToImage(imageString, "background.png");
+        File file = new File("background.png");
+        Image image = new Image(file.toURI().toString());
+        drawImage(image);
     }
 
     void drawText(String text, Color color, double x, double y, double fontSize) {
@@ -162,4 +173,6 @@ class Artist {
         drawEllipse(x, y, axis1, axis2, color, fill, strokeWidth);
 
     }
+
+
 }

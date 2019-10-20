@@ -36,9 +36,14 @@ public class HTTPConnect {
     public JSONArray onlineUserList;
     public JSONArray activeUserList;
     public boolean isManager = false;
+    public int currentNumber = -1;
+
+    private Artist artist;
+    public Thread updateThread;
 
     HTTPConnect(){
         httpclient = HttpClients.createDefault();
+        updateThread = getUpdateThread();
     }
 
     public void setUsername(String username){
@@ -47,6 +52,10 @@ public class HTTPConnect {
         }else{
             System.out.println("User name illegal");
         }
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
     }
 
     public void testConnect(){
@@ -416,6 +425,7 @@ public class HTTPConnect {
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
                 if (content.get("result").equals(null)){
+                    //Should not exist
                     System.out.println("No canvas exists");
                 }
                 else{
@@ -708,6 +718,7 @@ public class HTTPConnect {
         if (isManager){
             //Register self as active
             registerActive(username);
+            //postCanvas();
         }
         else{
             //Send waiting request
@@ -736,6 +747,65 @@ public class HTTPConnect {
         myHTTPConnect.deleteActiveSelf();
     }
 
+    public void sendCanvas(JSONObject json){
+        new Thread(() -> {
+            // code goes here.
+            putCanvas(json);
+        }).start();
+    }
+
+    public void sendText(JSONObject text){
+        new Thread(() -> {
+            // code goes here.
+
+            postChatMessages(text);
+        }).start();
+    }
+
+    public Thread getUpdateThread(){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                JSONArray canvasResult;
+                if (currentNumber == -1){
+                    canvasResult = getCanvas();
+                }
+                else{
+                    canvasResult = getCanvas(currentNumber);
+                }
+                if (canvasResult.length()>0){
+                    for (int i = 0; i < canvasResult.length(); i++){
+                        JSONObject drawing = canvasResult.getJSONObject(i).getJSONObject("request");
+                        currentNumber = canvasResult.getJSONObject(i).getInt("id");
+                        String objectType = drawing.getString("Object");
+                        JSONObject action = drawing.getJSONObject("Action");
+                        switch (objectType){
+                            case "TEXT":
+                                artist.drawJSONText(action);
+                                break;
+                            case "CIRCLE":
+                                artist.drawJSONCircle(action);
+                                break;
+                            case "LINE":
+                                artist.drawJSONLine(action);
+                                break;
+                            case "RECTANGLE":
+                                artist.drawJSONRectangle(action);
+                                break;
+                            case "ELLIPSE":
+                                artist.drawJSONEllipse(action);
+                                break;
+                        }
+                        System.out.println(drawing);
+                    }
+                }
+
+            }
+        };
+        //thread.start();
+        return thread;
+    }
+
 
 
 
@@ -746,12 +816,15 @@ public class HTTPConnect {
         myHTTPConnect.getCanvas();
         JSONObject testJSON = new JSONObject();
         testJSON.put("test", "hello");
-        myHTTPConnect.putCanvas(testJSON);
+        //myHTTPConnect.sendText(testJSON);
         myHTTPConnect.getCanvas();
         myHTTPConnect.postChatMessages(testJSON);
         myHTTPConnect.getChatMessages();
+
         //myHTTPConnect.deleteCanvas();
 
+
+/*
         HTTPConnect newHTTPConnect = new HTTPConnect();
         newHTTPConnect.establishConnect("bc");
 
@@ -769,6 +842,7 @@ public class HTTPConnect {
         myHTTPConnect.postCanvas();
 
         newHTTPConnect.getCanvas();
+*/
 
     }
 

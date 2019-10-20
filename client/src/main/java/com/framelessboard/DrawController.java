@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class DrawController {
 
@@ -31,11 +32,15 @@ public class DrawController {
 
     public HTTPConnect myHTTPConnect;
 
-    public void setMyHTTPConnect(HTTPConnect loginHTTPConnect){
-        System.out.println("Start");
-        myHTTPConnect = loginHTTPConnect;
-        System.out.println(myHTTPConnect.token);
+    public void setMyHTTPConnect(HTTPConnect myHTTPConnect){
+        this.myHTTPConnect = myHTTPConnect;
     }
+
+    public void startUpdateThread(){
+        this.myHTTPConnect.updateThread.start();
+    }
+
+    private ArrayList<Double> positionList = new ArrayList<Double>();
 
 
     @FXML
@@ -81,6 +86,10 @@ public class DrawController {
 
     private GraphicsContext gc;
     private Artist artist;
+
+    public Artist getArtist(){
+        return artist;
+    }
 
     private WritableImage cleanSnapshot = null;
 
@@ -345,10 +354,11 @@ public class DrawController {
                 case RECTANGLE:
                     break;
                 case TEXT: {
+
                     artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
-
                     action = new CustomAction("TEXT", drawColor.getValue().toString(), x, y,textToDrawInput.getText(), strokeWidthInput.getValue());
-
+                    //artist.drawJSONText(action.getAction().getJSONObject("Action"));
+                    myHTTPConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -358,6 +368,7 @@ public class DrawController {
                 case ERASER: {
                     artist.erase(x, y, strokeWidthInput.getValue());
                     action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+
 
 
                     modifiedAfterLastSave = true;
@@ -507,6 +518,7 @@ public class DrawController {
 
                     artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("CIRCLE", drawColor.getValue().toString(),startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    myHTTPConnect.putCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -515,10 +527,8 @@ public class DrawController {
                 }
                 case LINE: {
                     artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
-                    action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, false);
-                    System.out.println(action.getAction());
-                    System.out.println(myHTTPConnect.token);
-                    //myHTTPConnect.putCanvas(action.getAction());
+                    action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, strokeWidthInput.getValue());
+                    myHTTPConnect.putCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 
@@ -533,6 +543,10 @@ public class DrawController {
                     alignStartEnd();
 
                     artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
+                    System.out.println(action.getAction());
+                    myHTTPConnect.putCanvas(action.getAction());
+
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -546,6 +560,8 @@ public class DrawController {
                     alignStartEnd();
 
                     artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("ELLIPSE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    myHTTPConnect.putCanvas(action.getAction());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;

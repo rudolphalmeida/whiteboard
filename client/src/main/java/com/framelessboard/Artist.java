@@ -5,6 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import org.json.JSONObject;
 
 class Artist {
 
@@ -35,6 +36,15 @@ class Artist {
         gc.fillText(text, x, y);
     }
 
+    void drawJSONText(JSONObject action) {
+        double x = action.getDouble("startX");
+        double y = action.getDouble("startY");
+        double fontSize = action.getDouble("fontSize");
+        Color color = Color.valueOf(action.getString("color"));
+        String text = action.getString("text");
+
+        drawText(text, color, x, y, fontSize);
+    }
     void drawFreeHand(double x, double y, double size, Color color) {
         gc.setStroke(color);
         gc.setFill(color);
@@ -68,6 +78,16 @@ class Artist {
         }
     }
 
+    void drawJSONCircle(JSONObject action) {
+        double x = action.getDouble("startX");
+        double y = action.getDouble("startY");
+        double radius = action.getDouble("radius");
+        Color color = Color.valueOf(action.getString("color"));
+        double strokeWidth = action.getDouble("StrokeWidth");
+        boolean fill = action.getBoolean("fill");
+        drawCircle(x, y, radius, color, fill, strokeWidth);
+    }
+
     void drawLine(double startX, double startY, double endX, double endY, double thickness, Color color) {
         gc.setLineWidth(thickness);
 
@@ -75,6 +95,18 @@ class Artist {
         gc.setFill(color);
 
         gc.strokeLine(startX, startY, endX, endY);
+    }
+
+    void drawJSONLine(JSONObject action) {
+
+        double startX = action.getDouble("startX");
+        double startY = action.getDouble("startY");
+        double endX = action.getDouble("endX");
+        double endY = action.getDouble("endY");
+        double thickness = action.getDouble("thickness");
+        Color color = Color.valueOf(action.getString("color"));
+
+        drawLine( startX,  startY,  endX,  endY,  thickness,  color);
     }
 
     void drawRectangle(double x, double y, double width, double height, Color color, boolean fill, double strokeWidth) {
@@ -90,6 +122,20 @@ class Artist {
         }
     }
 
+
+    void drawJSONRectangle(JSONObject action) {
+
+        double x = action.getDouble("startX");
+        double y = action.getDouble("startY");
+        double width = action.getDouble("width");
+        double height = action.getDouble("height");
+        double strokeWidth = action.getDouble("strokeWidth");
+        Color color = Color.valueOf(action.getString("color"));
+        boolean fill = action.getBoolean("fill");
+
+        drawRectangle(x, y, width, height, color, fill, strokeWidth);
+    }
+
     void drawEllipse(double x, double y, double axis1, double axis2, Color color, boolean fill, double strokeWidth) {
         gc.setStroke(color);
         gc.setFill(color);
@@ -101,5 +147,19 @@ class Artist {
         } else {
             gc.strokeOval(x, y, axis1, axis2);
         }
+    }
+
+    void drawJSONEllipse(JSONObject action) {
+
+        double x = action.getDouble("startX");
+        double y = action.getDouble("startY");
+        double axis1 = action.getDouble("axis1");
+        double axis2 = action.getDouble("axis2");
+        double strokeWidth = action.getDouble("strokeWidth");
+        Color color = Color.valueOf(action.getString("color"));
+        boolean fill = action.getBoolean("fill");
+
+        drawEllipse(x, y, axis1, axis2, color, fill, strokeWidth);
+
     }
 }

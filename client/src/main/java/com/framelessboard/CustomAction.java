@@ -29,8 +29,36 @@ public class CustomAction {
 
     */
 
-    // Constructor for shapes - lines, rectangles, ellipses and circles.
-    CustomAction(String actionType, String color, double startX, double startY, double endX, double endY, boolean filled) {
+    // Constructor for ellipses
+    CustomAction(String actionType, String color, double startX, double startY, double axis1, double axis2,  boolean filled, double strokeWidth) {
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("color", color);
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        attributes.put("axis1", axis1);
+        attributes.put("axis2", axis2);
+        attributes.put("fill", filled);
+        attributes.put("strokeWidth", strokeWidth);
+        action.put("Action", attributes);
+    }
+
+    // Constructor for rectangles
+    CustomAction(String actionType, String color, double startX, double startY, double width, double height, double strokeWidth, boolean filled) {
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("color", color);
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        attributes.put("width", width);
+        attributes.put("height", height);
+        attributes.put("fill", filled);
+        attributes.put("strokeWidth", strokeWidth);
+        action.put("Action", attributes);
+    }
+
+    // Constructor for lines
+    CustomAction(String actionType, String color, double startX, double startY, double endX, double endY, double thickness) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("color", color);
@@ -38,7 +66,7 @@ public class CustomAction {
         attributes.put("startY", startY);
         attributes.put("endX", endX);
         attributes.put("endY", endY);
-        attributes.put("filled", filled);
+        attributes.put("thickness", thickness);
         action.put("Action", attributes);
     }
 
@@ -59,6 +87,8 @@ public class CustomAction {
         attributes.put("color", color);
         attributes.put("startX", startX);
         attributes.put("startY", startY);
+        attributes.put("radius", radius);
+        attributes.put("fill", fill);
         attributes.put("StrokeWidth", strokeWidth);
         action.put("Action", attributes);
     }

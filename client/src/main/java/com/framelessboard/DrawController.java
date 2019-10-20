@@ -29,7 +29,13 @@ public class DrawController {
     public MenuItem menuQuit;
     public MenuItem menuOpen;
 
-    private HTTPConnect myHTTPConnect;
+    public HTTPConnect myHTTPConnect;
+
+    public void setMyHTTPConnect(HTTPConnect loginHTTPConnect){
+        System.out.println("Start");
+        myHTTPConnect = loginHTTPConnect;
+        System.out.println(myHTTPConnect.token);
+    }
 
 
     @FXML
@@ -511,6 +517,8 @@ public class DrawController {
                     artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
                     action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, false);
                     System.out.println(action.getAction());
+                    System.out.println(myHTTPConnect.token);
+                    //myHTTPConnect.putCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 
@@ -585,6 +593,8 @@ public class DrawController {
 
         return Math.hypot(ac, cb);
     }
+
+
 
     @FXML
     private void switchToLogin() throws IOException {

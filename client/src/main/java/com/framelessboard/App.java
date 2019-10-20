@@ -15,13 +15,19 @@ public class App extends Application {
 
     private static Scene scene;
 
+    private HTTPConnect myHTTPConnect = new HTTPConnect();
+
+
+
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("draw"));
+        scene = new Scene(loadFXML("login"));
         stage.setTitle("FramelessBoard");
-        stage.setResizable(false);
+        //stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
+
+
     }
 
     static void setRoot(String fxml) throws IOException {

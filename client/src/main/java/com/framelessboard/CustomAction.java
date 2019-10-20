@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CustomAction {
 
-    public JSONObject action;
+    public JSONObject action = new JSONObject();
 
     /*
 
@@ -30,7 +30,7 @@ public class CustomAction {
     */
 
     // Constructor for shapes - lines, rectangles, ellipses and circles.
-    CustomAction(int actionType, String color, double startX, double startY, double endX, double endY, boolean filled) {
+    CustomAction(String actionType, String color, double startX, double startY, double endX, double endY, boolean filled) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("color", color);
@@ -42,8 +42,40 @@ public class CustomAction {
         action.put("Action", attributes);
     }
 
+    // Constructor for erasers
+    CustomAction(String actionType, double startX, double startY, double strokeWidth) {
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        attributes.put("StrokeWidth", strokeWidth);
+        action.put("Action", attributes);
+    }
+
+    // Constructor for Circle
+    CustomAction(String actionType, String color, double startX, double startY, double radius, boolean fill, double strokeWidth) {
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("color", color);
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        attributes.put("StrokeWidth", strokeWidth);
+        action.put("Action", attributes);
+    }
+
+    // Constructor for FreeHand
+    CustomAction(String actionType, String color, double startX, double startY, double strokeWidth) {
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("color", color);
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        attributes.put("StrokeWidth", strokeWidth);
+        action.put("Action", attributes);
+    }
+
     // Constructor for freehand drawings - freehand lines and erasers.
-    CustomAction(int actionType, String color, double strokeWidth) {
+    CustomAction(String actionType, String color, double strokeWidth) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("StrokeWidth", strokeWidth);
@@ -51,18 +83,19 @@ public class CustomAction {
     }
 
     // Constructor for text drawings.
-    CustomAction(int actionType, String color, double startX, double startY, String text) {
+    CustomAction(String actionType, String color, double startX, double startY, String text, double fontSize) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("color", color);
         attributes.put("startX", startX);
         attributes.put("startY", startY);
         attributes.put("text", text);
+        attributes.put("fontSize", fontSize);
         action.put("Action", attributes);
     }
 
     // Constructur for background.
-    CustomAction(int actionType, JSONObject encoding) {
+    CustomAction(String actionType, JSONObject encoding) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("encoding", encoding.toString());
@@ -70,7 +103,7 @@ public class CustomAction {
     }
 
     // Constructor for chat messages.
-    CustomAction(int actionType, String message) {
+    CustomAction(String actionType, String message) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("message", message);

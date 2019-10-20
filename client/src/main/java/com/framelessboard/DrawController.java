@@ -29,6 +29,9 @@ public class DrawController {
     public MenuItem menuQuit;
     public MenuItem menuOpen;
 
+    private HTTPConnect myHTTPConnect;
+
+
     @FXML
     private ToggleButton rectangleToggle;
 
@@ -328,7 +331,7 @@ public class DrawController {
             // Get coordinates of click
             double x = event.getX();
             double y = event.getY();
-
+            CustomAction action = null;
             switch (currentTool) {
                 case ELLIPSE:
                 case LINE:
@@ -338,6 +341,9 @@ public class DrawController {
                 case TEXT: {
                     artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
 
+                    action = new CustomAction("TEXT", drawColor.getValue().toString(), x, y,textToDrawInput.getText(), strokeWidthInput.getValue());
+
+
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
                     stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "*");
@@ -345,6 +351,8 @@ public class DrawController {
                 }
                 case ERASER: {
                     artist.erase(x, y, strokeWidthInput.getValue());
+                    action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -353,6 +361,7 @@ public class DrawController {
                 }
                 case FREEHAND: {
                     artist.drawFreeHand(x, y, strokeWidthInput.getValue(), drawColor.getValue());
+                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -384,13 +393,17 @@ public class DrawController {
 
         drawCanvas.setOnMouseDragged(event -> {
             if (currentTool == null) return;
-
+            CustomAction action = null;
             switch (currentTool) {
                 case ERASER:
                     artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
+                    action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+                    System.out.println(action.getAction());
                     break;
                 case FREEHAND:
                     artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
+                    System.out.println(action.getAction());
                     break;
                 case LINE: {
                     // Restore previous snapshot
@@ -405,6 +418,7 @@ public class DrawController {
                     endY = event.getY();
 
                     artist.drawLine(startX, startY, endX, endY, 1.0, transparentColor);
+
                     break;
                 }
                 case RECTANGLE: {
@@ -473,7 +487,7 @@ public class DrawController {
         // drag exited
         drawCanvas.setOnMouseReleased(event -> {
             if (currentTool == null) return;
-
+            CustomAction action = null;
             switch (currentTool) {
                 case TEXT:
                 case ERASER:
@@ -486,6 +500,7 @@ public class DrawController {
                     double radius = distance(startX, startY, outerX, outerY);
 
                     artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("CIRCLE", drawColor.getValue().toString(),startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -494,6 +509,8 @@ public class DrawController {
                 }
                 case LINE: {
                     artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, false);
+                    System.out.println(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 

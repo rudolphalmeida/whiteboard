@@ -753,7 +753,6 @@ public class HTTPConnect {
 
     public void sendCanvas(JSONObject json){
         new Thread(() -> {
-            // code goes here.
             putCanvas(json);
         }).start();
     }
@@ -844,7 +843,7 @@ public class HTTPConnect {
         HTTPConnect myHTTPConnect = new HTTPConnect();
         myHTTPConnect.establishConnect("abc");
         //myHTTPConnect.postCanvas();
-        //myHTTPConnect.getCanvas(0);
+        myHTTPConnect.getCanvas(0);
         JSONObject testJSON = new JSONObject();
         testJSON.put("Object", "IMAGE");
         JSONObject testAction = new JSONObject();
@@ -857,7 +856,7 @@ public class HTTPConnect {
         testAction.put("image", test);
         testJSON.put("Action", testAction);
         //System.out.println(testAction);
-        myHTTPConnect.sendCanvas(testJSON);
+        //myHTTPConnect.sendCanvas(testJSON);
         try {
             myHTTPConnect.getCanvas();
         }catch (Exception e){
@@ -869,7 +868,7 @@ public class HTTPConnect {
         //myHTTPConnect.deleteCanvas();
 
 
-/*
+
         HTTPConnect newHTTPConnect = new HTTPConnect();
         newHTTPConnect.establishConnect("bc");
 
@@ -880,14 +879,9 @@ public class HTTPConnect {
         myHTTPConnect.getActiveUser();
         myHTTPConnect.getWaitingUsers();
 
-        newHTTPConnect.getCanvas();
-        newHTTPConnect.getChatMessages();
 
-        myHTTPConnect.deleteCanvas();
-        myHTTPConnect.postCanvas();
 
-        newHTTPConnect.getCanvas();
-*/
+
 
     }
 

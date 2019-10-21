@@ -213,6 +213,9 @@ public class DrawController {
 
         Image image = new Image(file.toURI().toString());
         CustomAction imageAction = new CustomAction("IMAGE", file);
+        System.out.println("PostCanvas");
+        myHTTPConnect.deleteCanvas();
+        myHTTPConnect.registerActive(myHTTPConnect.username);
         myHTTPConnect.postCanvas();
         myHTTPConnect.sendCanvas(imageAction.getAction());
 
@@ -411,7 +414,7 @@ public class DrawController {
                 }
                 case FILL: {
                     //artist.floodFill(x, y, drawColor.getValue());
-                    //action = new CustomAction("FILL", drawColor.getValue().toString(), x, y);
+                    action = new CustomAction("FILL", drawColor.getValue().toString(), x, y);
                     myHTTPConnect.sendCanvas((action.getAction()));
 
 
@@ -557,7 +560,7 @@ public class DrawController {
 
                     //artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("CIRCLE", drawColor.getValue().toString(),startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
-                    myHTTPConnect.putCanvas(action.getAction());
+                    myHTTPConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -567,7 +570,7 @@ public class DrawController {
                 case LINE: {
                     //artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
                     action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, strokeWidthInput.getValue());
-                    myHTTPConnect.putCanvas(action.getAction());
+                    myHTTPConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 
@@ -584,7 +587,7 @@ public class DrawController {
                     //artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
                     System.out.println(action.getAction());
-                    myHTTPConnect.putCanvas(action.getAction());
+                    myHTTPConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0; // Reset start and end
 

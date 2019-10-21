@@ -14,12 +14,17 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DrawController {
 
@@ -40,7 +45,7 @@ public class DrawController {
         this.myHTTPConnect.updateThread.start();
     }
 
-    private ArrayList<Double> positionList = new ArrayList<Double>();
+    private ArrayList<Double> pointBuffer = new ArrayList<Double>();
 
 
     @FXML
@@ -207,6 +212,13 @@ public class DrawController {
         }
 
         Image image = new Image(file.toURI().toString());
+        CustomAction imageAction = new CustomAction("IMAGE", file);
+        myHTTPConnect.postCanvas();
+        myHTTPConnect.sendCanvas(imageAction.getAction());
+
+
+
+
         artist.drawImage(image);
     }
 
@@ -367,7 +379,9 @@ public class DrawController {
                 }
                 case ERASER: {
                     artist.erase(x, y, strokeWidthInput.getValue());
-                    action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+                    //action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+                    pointBuffer.add(x);
+                    pointBuffer.add(y);
 
 
 
@@ -378,7 +392,9 @@ public class DrawController {
                 }
                 case FREEHAND: {
                     artist.drawFreeHand(x, y, strokeWidthInput.getValue(), drawColor.getValue());
-                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
+                    //action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
+                    pointBuffer.add(x);
+                    pointBuffer.add(y);
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -386,7 +402,11 @@ public class DrawController {
                     break;
                 }
                 case FILL: {
-                    artist.floodFill(x, y, drawColor.getValue());
+                    //artist.floodFill(x, y, drawColor.getValue());
+                    action = new CustomAction("FILL", drawColor.getValue().toString(), x, y);
+                    myHTTPConnect.sendCanvas((action.getAction()));
+
+
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -414,13 +434,17 @@ public class DrawController {
             switch (currentTool) {
                 case ERASER:
                     artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
-                    action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
-                    System.out.println(action.getAction());
+                    //action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
+                    //System.out.println(action.getAction());
+                    pointBuffer.add(event.getX());
+                    pointBuffer.add(event.getY());
                     break;
                 case FREEHAND:
                     artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
-                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
-                    System.out.println(action.getAction());
+                    //action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
+                    //System.out.println(action.getAction());
+                    pointBuffer.add(event.getX());
+                    pointBuffer.add(event.getY());
                     break;
                 case LINE: {
                     // Restore previous snapshot
@@ -508,7 +532,14 @@ public class DrawController {
             switch (currentTool) {
                 case TEXT:
                 case ERASER:
+                    action = new CustomAction("ERASER", Color.WHITE.toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    myHTTPConnect.sendCanvas(action.getAction());
                 case FREEHAND:
+                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    System.out.println(action.getAction());
+                    myHTTPConnect.sendCanvas(action.getAction());
                 case FILL:
                     break;
                 case CIRCLE: {
@@ -614,6 +645,9 @@ public class DrawController {
 
     @FXML
     private void switchToLogin() throws IOException {
+        myHTTPConnect.stopUpdateThread();
+        System.out.println("Stop Update");
         App.setRoot("login");
+
     }
 }

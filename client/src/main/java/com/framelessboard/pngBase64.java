@@ -12,14 +12,13 @@ public class pngBase64 {
 
 
 
-    public String pngToString(String filePath) throws FileNotFoundException{
+    public String pngToString(String filePath){
         String encodedString = null;
         try{
             byte[] fileContent = FileUtils.readFileToByteArray(new File(filePath));
             encodedString = Base64.getEncoder().encodeToString(fileContent);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw e;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,13 +40,11 @@ public class pngBase64 {
 
         pngBase64 png = new pngBase64();
         String test = null;
-        try{
-            test = png.pngToString("C:/Users/IF/Pictures/wallhaven.png");
-            System.out.println(test);
-            png.decodeToImage(test, "background.png");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        test = png.pngToString("C:/Users/IF/Pictures/wallhaven.png");
+        System.out.println(test);
+        png.decodeToImage(test, "background.png");
+
 
     }
 }

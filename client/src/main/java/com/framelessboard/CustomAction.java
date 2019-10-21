@@ -3,6 +3,7 @@ package com.framelessboard;
 import org.json.JSONObject;
 import java.awt.geom.*;
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,15 +71,6 @@ public class CustomAction {
         action.put("Action", attributes);
     }
 
-    // Constructor for erasers
-    CustomAction(String actionType, double startX, double startY, double strokeWidth) {
-        action.put("Object", actionType);
-        JSONObject attributes = new JSONObject();
-        attributes.put("startX", startX);
-        attributes.put("startY", startY);
-        attributes.put("StrokeWidth", strokeWidth);
-        action.put("Action", attributes);
-    }
 
     // Constructor for Circle
     CustomAction(String actionType, String color, double startX, double startY, double radius, boolean fill, double strokeWidth) {
@@ -93,22 +85,14 @@ public class CustomAction {
         action.put("Action", attributes);
     }
 
-    // Constructor for FreeHand
-    CustomAction(String actionType, String color, double startX, double startY, double strokeWidth) {
-        action.put("Object", actionType);
-        JSONObject attributes = new JSONObject();
-        attributes.put("color", color);
-        attributes.put("startX", startX);
-        attributes.put("startY", startY);
-        attributes.put("StrokeWidth", strokeWidth);
-        action.put("Action", attributes);
-    }
 
     // Constructor for freehand drawings - freehand lines and erasers.
-    CustomAction(String actionType, String color, double strokeWidth) {
+    CustomAction(String actionType, String color, double strokeWidth, ArrayList<Double> pointBuffer) {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("StrokeWidth", strokeWidth);
+        attributes.put("color", color);
+        attributes.put("pointBuffer", pointBuffer);
         action.put("Action", attributes);
     }
 
@@ -124,11 +108,24 @@ public class CustomAction {
         action.put("Action", attributes);
     }
 
-    // Constructur for background.
-    CustomAction(String actionType, JSONObject encoding) {
+    // Constructor for fill drawings.
+    CustomAction(String actionType, String color, double startX, double startY){
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
-        attributes.put("encoding", encoding.toString());
+        attributes.put("color", color);
+        attributes.put("startX", startX);
+        attributes.put("startY", startY);
+        action.put("Action", attributes);
+    }
+
+    // Constructur for background.
+    CustomAction(String actionType, File file) {
+        pngBase64 png = new pngBase64();
+        String imgaeString = png.pngToString(file.getPath());
+
+        action.put("Object", actionType);
+        JSONObject attributes = new JSONObject();
+        attributes.put("image", imgaeString);
         action.put("Action", attributes);
     }
 
@@ -137,6 +134,7 @@ public class CustomAction {
         action.put("Object", actionType);
         JSONObject attributes = new JSONObject();
         attributes.put("message", message);
+        action.put("Action", attributes);
     }
 
     public JSONObject getAction() {

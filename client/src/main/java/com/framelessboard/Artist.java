@@ -5,9 +5,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 
 class Artist {
 
@@ -62,6 +64,19 @@ class Artist {
         gc.fillOval(x, y, size, size);
     }
 
+    void drawJSONFreeHand(JSONObject action) {
+        JSONArray points = action.getJSONArray("pointBuffer");
+        Color color = Color.valueOf(action.getString("color"));
+        double size = action.getDouble("StrokeWidth");
+        gc.setStroke(color);
+        gc.setFill(color);
+        for (int i=0; i<points.length(); i=i+2){
+            double x = points.getDouble(i);
+            double y = points.getDouble(i+1);
+            gc.fillOval(x, y, size, size);
+        }
+    }
+
     void erase(double x, double y, double size) {
         gc.setStroke(Color.WHITE);
         gc.setFill(Color.WHITE);
@@ -71,6 +86,13 @@ class Artist {
     void floodFill(double x, double y, Color color) {
         FloodFill ff = new FloodFill(gc, canvas, x, y, color);
         ff.start();
+    }
+
+    void drawJSONFill(JSONObject action){
+        double x = action.getDouble("startX");
+        double y = action.getDouble("startY");
+        Color color = Color.valueOf(action.getString("color"));
+        floodFill(x, y, color);
     }
 
     void drawCircle(double x, double y, double radius, Color color, boolean fill, double strokeWidth) {

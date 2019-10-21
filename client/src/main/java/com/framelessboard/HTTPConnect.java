@@ -1,5 +1,6 @@
 package com.framelessboard;
 
+import javafx.application.Platform;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
@@ -41,6 +42,7 @@ public class HTTPConnect {
 
     private Artist artist;
     public Thread updateThread;
+    boolean stopUpdate = true;
 
     HTTPConnect(){
         httpclient = HttpClients.createDefault();
@@ -373,7 +375,7 @@ public class HTTPConnect {
         }
     }
 
-    public JSONArray getCanvas(){
+    public JSONArray getCanvas() throws Exception{
         //To get all data of the canvas
         try{
             String uri = url + "/canvas";
@@ -404,6 +406,7 @@ public class HTTPConnect {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                throw new Exception(content.toString());
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -763,32 +766,42 @@ public class HTTPConnect {
         }).start();
     }
 
+
     public Thread getUpdateThread(){
         Thread thread = new Thread(){
             @Override
             public void run() {
-                JSONArray canvasResult;
-                if (currentNumber == -1){
-                    canvasResult = getCanvas();
-                }
-                else{
-                    canvasResult = getCanvas(currentNumber);
-                }
-                if (canvasResult.length()>0){
-                    for (int i = 0; i < canvasResult.length(); i++){
-                        JSONObject drawing = canvasResult.getJSONObject(i).getJSONObject("request");
-                        currentNumber = canvasResult.getJSONObject(i).getInt("id");
-                        String objectType = drawing.getString("Object");
-                        JSONObject action = drawing.getJSONObject("Action");
-                        drawAction(objectType, action);
-                        System.out.println(drawing);
+                while (stopUpdate){
+                    JSONArray canvasResult = null;
+                    if (currentNumber == -1){
+                        try {
+                            canvasResult = getCanvas();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        canvasResult = getCanvas(currentNumber);
+                    }
+                    if (canvasResult.length()>0){
+                        for (int i = 0; i < canvasResult.length(); i++){
+                            JSONObject drawing = canvasResult.getJSONObject(i).getJSONObject("request");
+                            currentNumber = canvasResult.getJSONObject(i).getInt("id");
+                            String objectType = drawing.getString("Object");
+                            JSONObject action = drawing.getJSONObject("Action");
+                            drawAction(objectType, action);
+                            //System.out.println(drawing);
+                        }
                     }
                 }
-
             }
         };
         //thread.start();
         return thread;
+    }
+
+    public void stopUpdateThread(){
+        stopUpdate = false;
     }
 
     public void drawAction(String objectType, JSONObject action){
@@ -808,8 +821,19 @@ public class HTTPConnect {
             case "ELLIPSE":
                 artist.drawJSONEllipse(action);
                 break;
-            case "Image":
+            case "IMAGE":
                 artist.drawJSONImage(action);
+                break;
+            case "FREEHAND":
+            case "ERASER":
+                artist.drawJSONFreeHand(action);
+                break;
+            case "FILL":
+                Platform.runLater(()->{
+                    //modify your javafx app here.
+                    artist.drawJSONFill(action);
+                });
+                break;
         }
     }
 
@@ -819,25 +843,26 @@ public class HTTPConnect {
     public static void main( String[] args ){
         HTTPConnect myHTTPConnect = new HTTPConnect();
         myHTTPConnect.establishConnect("abc");
-        myHTTPConnect.postCanvas();
-        myHTTPConnect.getCanvas();
+        //myHTTPConnect.postCanvas();
+        //myHTTPConnect.getCanvas(0);
         JSONObject testJSON = new JSONObject();
-        testJSON.put("Object", "Image");
+        testJSON.put("Object", "IMAGE");
         JSONObject testAction = new JSONObject();
         pngBase64 png = new pngBase64();
         String test = null;
-        try {
-            test = png.pngToString("C:/Users/IF/Pictures/fbk.png");
-            System.out.println(test);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        test = png.pngToString("C:/Users/IF/Pictures/fbk.png");
+        //System.out.println(test);
+
         testAction.put("image", test);
         testJSON.put("Action", testAction);
         //System.out.println(testAction);
         myHTTPConnect.sendCanvas(testJSON);
-        System.out.println("Canvas");
-        myHTTPConnect.getCanvas();
+        try {
+            myHTTPConnect.getCanvas();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 //        myHTTPConnect.postChatMessages(testJSON);
 //        myHTTPConnect.getChatMessages();
 

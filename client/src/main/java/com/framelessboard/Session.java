@@ -1,6 +1,7 @@
 package com.framelessboard;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,6 +28,12 @@ public class Session {
         user.setUserData(name);
         user.setText(name);
         user.setId(name);
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e) {
+                kickUser(e);
+            }
+        };
+        user.setOnAction(event);
         users.add(user);
         userList.getChildren().add(user);
     }

@@ -36,6 +36,7 @@ public class Chat {
                 INSERT SEND CHAT MESSAGE TO OTHERS HERE.
                 sendMessage(myMessage);
                 */
+            inputField.clear();
         }
     }
 

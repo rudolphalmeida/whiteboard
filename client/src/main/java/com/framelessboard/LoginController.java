@@ -22,15 +22,25 @@ public class LoginController {
 
     @FXML
     private void switchToDraw() throws IOException {
+        myHTTPConnect = new HTTPConnect();
+        myHTTPConnect.establishConnect("abc");
+
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(App.class.getResource("draw.fxml"));
         Parent p = loader.load();
-
         DrawController drawController = loader.getController();
-        myHTTPConnect = new HTTPConnect();
-        myHTTPConnect.establishConnect("abc");
         myHTTPConnect.setArtist(drawController.getArtist());
         drawController.setMyHTTPConnect(myHTTPConnect);
+
+
+        FXMLLoader loader2 = new FXMLLoader();
+        loader2.setLocation(App.class.getResource("chat.fxml"));
+        Parent p2 = loader2.load();
+        Chat chatController = loader2.getController();
+        myHTTPConnect.setChat(chatController);
+        chatController.setMyHTTPConnect(myHTTPConnect);
+
+
         drawController.startUpdateThread();
 
         Stage stage = (Stage) loginButton.getScene().getWindow();

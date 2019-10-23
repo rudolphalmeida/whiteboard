@@ -38,9 +38,14 @@ public class HTTPConnect {
     public JSONArray onlineUserList;
     public JSONArray activeUserList;
     public boolean isManager = false;
-    public int currentNumber = -1;
+    public int currentCanvas = -1;
+    public int currentChat = -1;
 
     private Artist artist;
+    private Chat chat;
+
+
+
     public Thread updateThread;
     boolean stopUpdate = true;
 
@@ -59,6 +64,10 @@ public class HTTPConnect {
 
     public void setArtist(Artist artist) {
         this.artist = artist;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
     }
 
     public void testConnect(){
@@ -634,7 +643,7 @@ public class HTTPConnect {
         }
     }
 
-    public void getChatMessages(){
+    public JSONArray getChatMessages(){
         //To reject some user to be an active user
         try{
             String uri = url + "/chatmessages";
@@ -646,6 +655,21 @@ public class HTTPConnect {
             if (response.getStatusLine().getStatusCode() == 200){
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                if (content.get("result").equals(null)){
+                    //Should not exist
+                    System.out.println("No canvas exists");
+                }
+                else{
+                    JSONArray result = content.getJSONArray("result");
+                    System.out.println(result);
+                    if (result.length() != 0){
+                        return result;
+//                        for (int i = 0; i < result.length(); i++){
+//                            JSONObject drawing = result.getJSONObject(i).getJSONObject("request");
+//                            System.out.println(drawing);
+//                        }
+                    }
+                }
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
@@ -657,9 +681,10 @@ public class HTTPConnect {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return new JSONArray();
     }
 
-    public void getChatMessages(int mid){
+    public JSONArray getChatMessages(int mid){
         //To reject some user to be an active user
         try{
             String uri = url + "/chatmessages/" + mid;
@@ -671,6 +696,21 @@ public class HTTPConnect {
             if (response.getStatusLine().getStatusCode() == 200){
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                if (content.get("result").equals(null)){
+                    //Should not exist
+                    System.out.println("No canvas exists");
+                }
+                else{
+                    JSONArray result = content.getJSONArray("result");
+                    System.out.println(result);
+                    if (result.length() != 0){
+                        return result;
+//                        for (int i = 0; i < result.length(); i++){
+//                            JSONObject drawing = result.getJSONObject(i).getJSONObject("request");
+//                            System.out.println(drawing);
+//                        }
+                    }
+                }
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
@@ -682,6 +722,7 @@ public class HTTPConnect {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return new JSONArray();
     }
 
     public void postChatMessages(JSONObject text){
@@ -757,11 +798,13 @@ public class HTTPConnect {
         }).start();
     }
 
-    public void sendText(JSONObject text){
+    public void sendText(String text){
+        JSONObject JSONText = new JSONObject();
+        JSONText.put("text", text);
+        JSONText.put("id", username);
+        System.out.println(JSONText);
         new Thread(() -> {
-            // code goes here.
-
-            postChatMessages(text);
+            postChatMessages(JSONText);
         }).start();
     }
 
@@ -769,10 +812,11 @@ public class HTTPConnect {
     public Thread getUpdateThread(){
         Thread thread = new Thread(){
             @Override
-            public void run() {
+            public synchronized void run() {
                 while (stopUpdate){
+                    //Updat Canvas
                     JSONArray canvasResult = null;
-                    if (currentNumber == -1){
+                    if (currentCanvas == -1){
                         try {
                             canvasResult = getCanvas();
                         }catch (Exception e){
@@ -780,17 +824,46 @@ public class HTTPConnect {
                         }
                     }
                     else{
-                        canvasResult = getCanvas(currentNumber);
+                        canvasResult = getCanvas(currentCanvas);
                     }
                     if (canvasResult.length()>0){
                         for (int i = 0; i < canvasResult.length(); i++){
                             JSONObject drawing = canvasResult.getJSONObject(i).getJSONObject("request");
-                            currentNumber = canvasResult.getJSONObject(i).getInt("id");
+                            currentCanvas = canvasResult.getJSONObject(i).getInt("id");
                             String objectType = drawing.getString("Object");
                             JSONObject action = drawing.getJSONObject("Action");
                             drawAction(objectType, action);
                             //System.out.println(drawing);
                         }
+                    }
+
+
+                    //Update Chat
+                    JSONArray chatResult = null;
+                    if (currentChat == -1){
+                        try {
+                            chatResult = getChatMessages();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        chatResult = getChatMessages(currentChat);
+                    }
+                    if (chatResult.length()>0){
+                        for (int i = 0; i < chatResult.length(); i++){
+                            JSONObject chating = chatResult.getJSONObject(i).getJSONObject("request");
+                            currentChat = chatResult.getJSONObject(i).getInt("id");
+                            String text = chating.getString("text");
+                            //System.out.println(drawing);
+                        }
+                    }
+
+                    //Wait for 500ms
+                    try {
+                        this.wait(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -843,41 +916,41 @@ public class HTTPConnect {
         HTTPConnect myHTTPConnect = new HTTPConnect();
         myHTTPConnect.establishConnect("abc");
         //myHTTPConnect.postCanvas();
-        myHTTPConnect.getCanvas(0);
-        JSONObject testJSON = new JSONObject();
-        testJSON.put("Object", "IMAGE");
-        JSONObject testAction = new JSONObject();
-        pngBase64 png = new pngBase64();
-        String test = null;
-
-        test = png.pngToString("C:/Users/IF/Pictures/fbk.png");
-        //System.out.println(test);
-
-        testAction.put("image", test);
-        testJSON.put("Action", testAction);
-        //System.out.println(testAction);
-        //myHTTPConnect.sendCanvas(testJSON);
-        try {
-            myHTTPConnect.getCanvas();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        myHTTPConnect.getCanvas(0);
+//        JSONObject testJSON = new JSONObject();
+//        testJSON.put("Object", "IMAGE");
+//        JSONObject testAction = new JSONObject();
+//        pngBase64 png = new pngBase64();
+//        String test = null;
+//
+//        test = png.pngToString("C:/Users/IF/Pictures/fbk.png");
+//        //System.out.println(test);
+//
+//        testAction.put("image", test);
+//        testJSON.put("Action", testAction);
+//        //System.out.println(testAction);
+//        //myHTTPConnect.sendCanvas(testJSON);
+//        try {
+//            myHTTPConnect.getCanvas();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
 //        myHTTPConnect.postChatMessages(testJSON);
-//        myHTTPConnect.getChatMessages();
+        myHTTPConnect.getChatMessages();
 
         //myHTTPConnect.deleteCanvas();
 
 
 
-        HTTPConnect newHTTPConnect = new HTTPConnect();
-        newHTTPConnect.establishConnect("bc");
-
-        myHTTPConnect.getActiveUser();
-        myHTTPConnect.getWaitingUsers();
-        System.out.println("Register bc as active");
-        myHTTPConnect.registerActive("bc");
-        myHTTPConnect.getActiveUser();
-        myHTTPConnect.getWaitingUsers();
+//        HTTPConnect newHTTPConnect = new HTTPConnect();
+//        newHTTPConnect.establishConnect("bc");
+//
+//        myHTTPConnect.getActiveUser();
+//        myHTTPConnect.getWaitingUsers();
+//        System.out.println("Register bc as active");
+//        myHTTPConnect.registerActive("bc");
+//        myHTTPConnect.getActiveUser();
+//        myHTTPConnect.getWaitingUsers();
 
 
 

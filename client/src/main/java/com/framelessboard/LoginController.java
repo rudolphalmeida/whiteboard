@@ -45,7 +45,9 @@ public class LoginController {
 
         Stage stage = (Stage) loginButton.getScene().getWindow();
         Scene scene = new Scene(p);
+        Scene scene2 = new Scene(p2);
         stage.setScene(scene);
+        //stage.setScene(scene2);
 
 
 

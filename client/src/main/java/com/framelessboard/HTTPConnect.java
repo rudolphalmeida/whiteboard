@@ -950,20 +950,23 @@ public class HTTPConnect {
                     registerOnline();
                     System.out.println(activeUserList);
                     System.out.println(onlineUserList);
+                    ArrayList<String> activeAndOnlineUserList = new ArrayList<String>();
+                    if (activeUserList.length()>0 && onlineUserList.length()>0){
+                        for (int i=0; i < activeUserList.length(); i++){
+                            for (int j=0; j < onlineUserList.length(); j++){
+                                if (activeUserList.get(i).equals(onlineUserList.get(j))){
+                                    activeAndOnlineUserList.add((String) activeUserList.get(i));
+                                }
+                            }
+                        }
+                    }
                     Platform.runLater(()->{
                         //modify your javafx app here.
                         drawController.clearUsers();
                         System.out.println("Check");
-                        if (activeUserList.length()>0 && onlineUserList.length()>0){
-                            for (int i=0; i < activeUserList.length(); i++){
-                                for (int j=0; i < onlineUserList.length(); i++){
-                                    if (activeUserList.get(i).equals(onlineUserList.get(j))){
-                                        drawController.receiveUser(activeUserList.getString(i));
-                                        System.out.println(activeUserList.getString(i));
-                                        //break;
-                                    }
-                                }
-
+                        if (activeAndOnlineUserList.size()>0){
+                            for (int i=0; i < activeAndOnlineUserList.size(); i++){
+                                drawController.receiveUser(activeAndOnlineUserList.get(i));
                             }
                         }
                     });

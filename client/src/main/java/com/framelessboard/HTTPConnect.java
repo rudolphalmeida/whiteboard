@@ -233,8 +233,12 @@ public class HTTPConnect {
             if (response.getStatusLine().getStatusCode() == 200){
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
-                onlineUserList = content.getJSONArray("result");
-                System.out.println(onlineUserList);
+                if (content.get("result").equals("null")){
+                    System.out.println("No thing new");
+                }else{
+                    onlineUserList = content.getJSONArray("result");
+                    System.out.println(onlineUserList);
+                }
             }
             else {
                 System.out.println(request.toString());

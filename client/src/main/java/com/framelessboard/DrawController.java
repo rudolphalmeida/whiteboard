@@ -243,6 +243,7 @@ public class DrawController {
         myHTTPConnect.deleteCanvas();
         myHTTPConnect.registerActive(myHTTPConnect.username);
         myHTTPConnect.reconnect();
+        myHTTPConnect.postCanvas();
         myHTTPConnect.sendCanvas(imageAction.getAction());
 
 

@@ -46,8 +46,10 @@ public class DrawController {
     }
 
     public void startUpdateThread(){
+        myHTTPConnect.updateThread =  myHTTPConnect.getUpdateThread();
         this.myHTTPConnect.updateThread.start();
     }
+
 
     private ArrayList<Double> pointBuffer = new ArrayList<Double>();
 
@@ -181,9 +183,7 @@ public class DrawController {
         if (!myHTTPConnect.isManager) return;
         if (confirmSave()) return;
 
-        myHTTPConnect.deleteCanvas();
-        myHTTPConnect.reconnect();
-        myHTTPConnect.postCanvas();
+
 
         // Reset attributes
         file = null;
@@ -199,6 +199,13 @@ public class DrawController {
         // Change the window title
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
+
+        System.out.println("Stop Update");
+        myHTTPConnect.stopUpdateThread();
+
+        myHTTPConnect.deleteCanvas();
+        myHTTPConnect.reconnect();
+        myHTTPConnect.postCanvas();
 
         // Reset canvas
         artist.clearCanvas();
@@ -228,6 +235,10 @@ public class DrawController {
         Image image = new Image(file.toURI().toString());
 
         CustomAction imageAction = new CustomAction("IMAGE", file);
+
+        System.out.println("Stop Update");
+        myHTTPConnect.stopUpdateThread();
+
         System.out.println("PostCanvas");
         myHTTPConnect.deleteCanvas();
         myHTTPConnect.registerActive(myHTTPConnect.username);

@@ -1,6 +1,7 @@
 package com.framelessboard;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
@@ -51,10 +52,12 @@ public class HTTPConnect {
 
 
     public Thread updateThread;
-    boolean stopUpdate = true;
+    public Task<Void> updateTask;
+    boolean stopUpdate = false;
 
     HTTPConnect(){
         httpclient = HttpClients.createDefault();
+
         updateThread = getUpdateThread();
     }
 
@@ -110,6 +113,8 @@ public class HTTPConnect {
                 System.out.println("Access-Token: "+ token);
             }
             else {
+                System.out.println(request.toString());
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -136,6 +141,7 @@ public class HTTPConnect {
                 currentMananger = content.getString("result");
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -168,7 +174,8 @@ public class HTTPConnect {
                     System.out.println(content);
                 }
                 else {
-                    System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
+                    System.out.println(request.toString());
+                System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                     JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                     System.out.println(content);
                 }
@@ -201,7 +208,8 @@ public class HTTPConnect {
                     System.out.println(content);
                 }
                 else {
-                    System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
+                    System.out.println(request.toString());
+                System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                     JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                     System.out.println(content);
                 }
@@ -229,6 +237,7 @@ public class HTTPConnect {
                 System.out.println(onlineUserList);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 onlineUserList = new JSONArray();
             }
@@ -253,6 +262,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -278,6 +288,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -305,6 +316,7 @@ public class HTTPConnect {
                 System.out.println(activeUserList);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -331,6 +343,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -356,6 +369,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -380,6 +394,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -391,7 +406,7 @@ public class HTTPConnect {
         }
     }
 
-    public JSONArray getCanvas() throws Exception{
+    public JSONArray getCanvas(){
         //To get all data of the canvas
         try{
             String uri = url + "/canvas";
@@ -419,10 +434,10 @@ public class HTTPConnect {
                 }
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
-                throw new Exception(content.toString());
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -461,6 +476,7 @@ public class HTTPConnect {
                 }
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -488,6 +504,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -514,6 +531,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -539,6 +557,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -565,6 +584,7 @@ public class HTTPConnect {
                 waitingUserList = content.getJSONArray("result");
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -591,6 +611,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -616,6 +637,7 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));System.out.println(content);
             }
@@ -642,6 +664,7 @@ public class HTTPConnect {
                 return state;
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -683,6 +706,7 @@ public class HTTPConnect {
                 }
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -724,6 +748,7 @@ public class HTTPConnect {
                 }
             }
             else {
+                System.out.println(request.toString());
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -752,6 +777,8 @@ public class HTTPConnect {
                 System.out.println(content);
             }
             else {
+                System.out.println(request.toString());
+
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
@@ -785,11 +812,12 @@ public class HTTPConnect {
     }
 
     public void reconnect(){
-        getToken();
+        //getToken();
 
-        getManager();
-        postMananger();
-        registerOnline();
+        //getManager();
+        //postMananger();
+        //registerOnline();
+        System.out.println("reconnect");
         currentCanvas = -1;
         currentChat = -1;
         if (isManager){
@@ -800,6 +828,8 @@ public class HTTPConnect {
             //Send waiting request
             postWaitingUsers();
         }
+        System.out.println("restart");
+        stopUpdate = false;
         updateThread = getUpdateThread();
         updateThread.start();
     }
@@ -830,7 +860,7 @@ public class HTTPConnect {
         Thread thread = new Thread(){
             @Override
             public synchronized void run() {
-                while (stopUpdate){
+                while (!stopUpdate){
                     //Check if active
                     System.out.println("Check active");
                     String state = getUserState();
@@ -846,11 +876,7 @@ public class HTTPConnect {
                     System.out.println("update canvas");
                     JSONArray canvasResult = null;
                     if (currentCanvas == -1){
-                        try {
-                            canvasResult = getCanvas();
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
+                        canvasResult = getCanvas();
                     }
                     else{
                         canvasResult = getCanvas(currentCanvas);
@@ -895,38 +921,42 @@ public class HTTPConnect {
                     }
 
                     //Update Waiting User
-                    System.out.println("update waiting user");
-                    getWaitingUsers();
-                    System.out.println(waitingUserList);
-                    if (!drawController.isBusy){
-                        if (waitingUserList != null && !waitingUserList.isEmpty()){
-
-                            Platform.runLater(()->{
-                                //modify your javafx app here.
-                                for (int i = 0; i < waitingUserList.length(); i++){
-                                    drawController.waitingUser(waitingUserList.getString(i));
-                                    System.out.println(waitingUserList.getString(i));
-                                }
-                            });
+                    if (isManager){
+                        System.out.println("update waiting user");
+                        getWaitingUsers();
+                        System.out.println(waitingUserList);
+                        if (!drawController.isBusy){
+                            if (waitingUserList != null && !waitingUserList.isEmpty()){
+                                Platform.runLater(()->{
+                                    //modify your javafx app here.
+                                    for (int i = 0; i < waitingUserList.length(); i++){
+                                        drawController.waitingUser(waitingUserList.getString(i));
+                                        System.out.println(waitingUserList.getString(i));
+                                    }
+                                });
+                            }
                         }
                     }
+
 
                     //Update Active User
                     System.out.println("update active user");
                     getActiveUser();
                     getOnlineUsers();
                     registerOnline();
-                    System.out.println("Check");
                     System.out.println(activeUserList);
                     System.out.println(onlineUserList);
                     Platform.runLater(()->{
                         //modify your javafx app here.
                         drawController.clearUsers();
+                        System.out.println("Check");
                         if (activeUserList.length()>0 && onlineUserList.length()>0){
-                            for (int i = 0; i < activeUserList.length(); i++){
+                            for (int i=0; i < activeUserList.length(); i++){
                                 for (int j=0; i < onlineUserList.length(); i++){
                                     if (activeUserList.get(i).equals(onlineUserList.get(j))){
                                         drawController.receiveUser(activeUserList.getString(i));
+                                        System.out.println(activeUserList.getString(i));
+                                        //break;
                                     }
                                 }
 
@@ -935,9 +965,9 @@ public class HTTPConnect {
                     });
 
 
-                    //Wait for 500ms
+                    //Wait for 100ms
                     try {
-                        this.wait(500);
+                        this.wait(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -949,7 +979,7 @@ public class HTTPConnect {
     }
 
     public void stopUpdateThread(){
-        stopUpdate = false;
+        stopUpdate = true;
     }
 
     public void drawAction(String objectType, JSONObject action){

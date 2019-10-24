@@ -181,6 +181,10 @@ public class DrawController {
         if (!myHTTPConnect.isManager) return;
         if (confirmSave()) return;
 
+        myHTTPConnect.deleteCanvas();
+        myHTTPConnect.registerActive(myHTTPConnect.username);
+        myHTTPConnect.postCanvas();
+
         // Reset attributes
         file = null;
         modifiedAfterLastSave = false;
@@ -199,13 +203,13 @@ public class DrawController {
         // Reset canvas
         artist.clearCanvas();
 
-        myHTTPConnect.deleteCanvas();
-        myHTTPConnect.registerActive(myHTTPConnect.username);
-        myHTTPConnect.postCanvas();
+
     }
 
     public void onOpen(ActionEvent actionEvent) {
         if (!myHTTPConnect.isManager) return;
+
+
         // Open a new workspace
         onNew(actionEvent);
 
@@ -222,14 +226,14 @@ public class DrawController {
         }
 
         Image image = new Image(file.toURI().toString());
+
         CustomAction imageAction = new CustomAction("IMAGE", file);
-
-
         System.out.println("PostCanvas");
         myHTTPConnect.deleteCanvas();
         myHTTPConnect.registerActive(myHTTPConnect.username);
         myHTTPConnect.postCanvas();
         myHTTPConnect.sendCanvas(imageAction.getAction());
+
 
         //artist.drawImage(image);
     }

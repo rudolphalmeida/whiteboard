@@ -111,8 +111,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -137,8 +137,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -169,8 +169,8 @@ public class HTTPConnect {
                 }
                 else {
                     System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                    //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                    //System.out.println(content);
+                    JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                    System.out.println(content);
                 }
             } catch (ClientProtocolException e) {
                 e.printStackTrace();
@@ -202,8 +202,8 @@ public class HTTPConnect {
                 }
                 else {
                     System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                    //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                    //System.out.println(content);
+                    JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                    System.out.println(content);
                 }
             } catch (ClientProtocolException e) {
                 e.printStackTrace();
@@ -254,8 +254,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -279,8 +279,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -306,8 +306,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
                 activeUserList = new JSONArray();
             }
         } catch (ClientProtocolException e) {
@@ -332,8 +332,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -357,8 +357,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -381,8 +381,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -462,8 +462,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -489,8 +489,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -515,8 +515,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -540,8 +540,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -566,8 +566,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
                 waitingUserList = new JSONArray();
             }
         } catch (ClientProtocolException e) {
@@ -592,8 +592,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -617,8 +617,7 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -644,8 +643,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -685,8 +684,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -726,8 +725,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -754,8 +753,8 @@ public class HTTPConnect {
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
-                //JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                //System.out.println(content);
+                JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+                System.out.println(content);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -828,6 +827,7 @@ public class HTTPConnect {
             public synchronized void run() {
                 while (stopUpdate){
                     //Check if active
+                    System.out.println("Check active");
                     String state = getUserState();
                     if (state.equals("kicked") | state.equals("rejected")){
                         try {
@@ -838,6 +838,7 @@ public class HTTPConnect {
                     }
 
                     //Updat Canvas
+                    System.out.println("update canvas");
                     JSONArray canvasResult = null;
                     if (currentCanvas == -1){
                         try {
@@ -862,6 +863,7 @@ public class HTTPConnect {
 
 
                     //Update Chat
+                    System.out.println("update chat");
                     JSONArray chatResult = null;
                     if (currentChat == -1){
                         try {
@@ -888,6 +890,7 @@ public class HTTPConnect {
                     }
 
                     //Update Waiting User
+                    System.out.println("update waiting user");
                     getWaitingUsers();
                     System.out.println(waitingUserList);
                     if (!drawController.isBusy){
@@ -904,6 +907,7 @@ public class HTTPConnect {
                     }
 
                     //Update Active User
+                    System.out.println("update active user");
                     getActiveUser();
                     getOnlineUsers();
                     registerOnline();
@@ -981,18 +985,18 @@ public class HTTPConnect {
 
     public static void main( String[] args ) throws InterruptedException {
         HTTPConnect myHTTPConnect = new HTTPConnect();
-        myHTTPConnect.establishConnect("abc");
+        myHTTPConnect.establishConnect("rudolph1");
+        myHTTPConnect.postCanvas();
         myHTTPConnect.getOnlineUsers();
         System.out.println(myHTTPConnect.onlineUserList);
         //myHTTPConnect.deleteCanvas();
-        TimeUnit.SECONDS.sleep(6);
-        myHTTPConnect.postCanvas();
+
         System.out.println(myHTTPConnect.getUserState());
         myHTTPConnect.getActiveUser();
         System.out.println(myHTTPConnect.activeUserList);
         myHTTPConnect.getOnlineUsers();
         System.out.println(myHTTPConnect.onlineUserList);
-//        myHTTPConnect.getCanvas(0);
+        myHTTPConnect.getCanvas(0);
 //        JSONObject testJSON = new JSONObject();
 //        testJSON.put("Object", "IMAGE");
 //        JSONObject testAction = new JSONObject();

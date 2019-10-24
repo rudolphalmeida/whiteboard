@@ -198,6 +198,10 @@ public class DrawController {
 
         // Reset canvas
         artist.clearCanvas();
+
+        myHTTPConnect.deleteCanvas();
+        myHTTPConnect.registerActive(myHTTPConnect.username);
+        myHTTPConnect.postCanvas();
     }
 
     public void onOpen(ActionEvent actionEvent) {
@@ -219,16 +223,15 @@ public class DrawController {
 
         Image image = new Image(file.toURI().toString());
         CustomAction imageAction = new CustomAction("IMAGE", file);
+
+
         System.out.println("PostCanvas");
         myHTTPConnect.deleteCanvas();
         myHTTPConnect.registerActive(myHTTPConnect.username);
         myHTTPConnect.postCanvas();
         myHTTPConnect.sendCanvas(imageAction.getAction());
 
-
-
-
-        artist.drawImage(image);
+        //artist.drawImage(image);
     }
 
     public void onClose(ActionEvent actionEvent) {
@@ -241,6 +244,9 @@ public class DrawController {
             switchToLogin();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (myHTTPConnect.isManager){
+            myHTTPConnect.deleteCanvas();
         }
     }
 
@@ -609,7 +615,7 @@ public class DrawController {
 
                     //artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
-                    System.out.println(action.getAction());
+                    //System.out.println(action.getAction());
                     myHTTPConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0; // Reset start and end
@@ -679,11 +685,10 @@ public class DrawController {
 
 
     @FXML
-    private void switchToLogin() throws IOException {
+    public void switchToLogin() throws IOException {
         myHTTPConnect.stopUpdateThread();
         System.out.println("Stop Update");
         App.setRoot("login");
-
     }
 
 

@@ -786,9 +786,12 @@ public class HTTPConnect {
 
     public void reconnect(){
         getToken();
+
         getManager();
         postMananger();
         registerOnline();
+        currentCanvas = -1;
+        currentChat = -1;
         if (isManager){
             //Register self as active
             registerActive(username);
@@ -797,6 +800,8 @@ public class HTTPConnect {
             //Send waiting request
             postWaitingUsers();
         }
+        updateThread = getUpdateThread();
+        updateThread.start();
     }
 
     public void userLogout(HTTPConnect myHTTPConnect){

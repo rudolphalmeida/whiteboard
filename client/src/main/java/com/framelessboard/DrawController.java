@@ -182,7 +182,7 @@ public class DrawController {
         if (confirmSave()) return;
 
         myHTTPConnect.deleteCanvas();
-        myHTTPConnect.registerActive(myHTTPConnect.username);
+        myHTTPConnect.reconnect();
         myHTTPConnect.postCanvas();
 
         // Reset attributes
@@ -231,7 +231,7 @@ public class DrawController {
         System.out.println("PostCanvas");
         myHTTPConnect.deleteCanvas();
         myHTTPConnect.registerActive(myHTTPConnect.username);
-        myHTTPConnect.postCanvas();
+        myHTTPConnect.reconnect();
         myHTTPConnect.sendCanvas(imageAction.getAction());
 
 

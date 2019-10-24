@@ -115,14 +115,28 @@
                 <TitledPane text="Session">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <fx:include source="session.fxml" />
+                      <VBox fx:id="userList" prefHeight="285.0" prefWidth="211.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" />
                     </AnchorPane>
                   </content>
                 </TitledPane>
                 <TitledPane text="Chat">
                   <content>
                     <AnchorPane id="chatPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <fx:include source="chat.fxml" />
+                      <VBox prefHeight="285.0" prefWidth="211.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+                        <children>
+                          <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                            <content>
+                              <VBox prefHeight="200.0" prefWidth="197.0" fx:id="chatBox" />
+                            </content>
+                          </ScrollPane>
+                          <HBox prefHeight="100.0" prefWidth="200.0">
+                            <children>
+                              <TextArea fx:id="inputField" prefHeight="93.0" prefWidth="140.0" wrapText="true" />
+                              <Button fx:id="sendButton" mnemonicParsing="false" text="Send" onAction="#buttonPress" />
+                            </children>
+                          </HBox>
+                        </children>
+                      </VBox>
                     </AnchorPane>
                   </content>
                 </TitledPane>

@@ -2,6 +2,7 @@ package com.framelessboard;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,6 +13,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -20,6 +22,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DrawController {
 
@@ -278,6 +282,15 @@ public class DrawController {
 
     @FXML
     private void initialize() {
+        /// CHAT INITIALIZE PARTS ///
+        messages.add(new Label(""));
+        // TODO: Insert some getName here, so user knows what their name is.
+        //setMyName();
+
+        /// SESSION INITIALIZE PARTS ///
+        receiveUser("Me");
+
+
         // On exit handler
         // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
         drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
@@ -578,4 +591,88 @@ public class DrawController {
     private void switchToLogin() throws IOException {
         App.setRoot("login");
     }
+
+    ////// SESSION CONTROLS //////
+
+    @FXML
+    private VBox userList = new VBox();
+
+    @FXML
+    private Button kickButton;
+
+    private List<Button> users = new ArrayList<>();
+
+    public void receiveUser(String name) {
+        Button user = new Button(name);
+        user.setUserData(name);
+        user.setText(name);
+        user.setId(name);
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e) {
+                kickUser(e);
+            }
+        };
+        user.setOnAction(event);
+        users.add(user);
+        userList.getChildren().add(user);
+    }
+
+    @FXML
+    public void kickUser(ActionEvent event) {
+        Button removed = (Button) event.getSource();
+        removeUser((String) removed.getUserData());
+        // TODO: Send kick to other clients here.
+    }
+
+    public void removeUser(String name) {
+        users.remove(name);
+        userList.getChildren().remove(userList.lookup("#" + name));
+    }
+
+    ////// CHAT CONTROL //////
+
+    @FXML
+    private TextArea inputField;
+    @FXML
+    private Button sendButton;
+    @FXML
+    private VBox chatBox = new VBox();
+
+    private List<Label> messages = new ArrayList<>();
+    public String myName = "REY";
+
+    @FXML
+    public void buttonPress(ActionEvent event) {
+        String myMessage = inputField.getText().trim();
+        if (!myMessage.equals("")) {
+            myMessage = myName + ": \n" + myMessage;
+            receiveMessage(myMessage);
+                /*
+                INSERT SEND CHAT MESSAGE TO OTHERS HERE.
+                sendMessage(myMessage);
+                */
+            inputField.clear();
+        }
+    }
+
+    public void setMyName(String myName) {
+        this.myName = myName;
+    }
+
+    public void newMessage(String message) {
+        messages.add(new Label(message));
+    }
+
+    // Displays messages "received" by themselves or by others.
+    public void receiveMessage(String message) {
+        newMessage(message);
+        System.out.println(message);
+        chatBox.getChildren().add(messages.get(messages.size() - 1));
+    }
+
+    // Sends messages to all other clients - would usually put "inputField.getText()" in argument.
+    public void sendMessage(String message) {
+        // TODO: message sending to clients.
+    }
+
 }

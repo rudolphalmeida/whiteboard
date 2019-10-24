@@ -2,6 +2,7 @@ package com.framelessboard;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +12,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -34,6 +36,8 @@ public class DrawController {
     public MenuItem menuSaveAs;
     public MenuItem menuQuit;
     public MenuItem menuOpen;
+
+    boolean isBusy = false;
 
     public HTTPConnect myHTTPConnect;
 
@@ -174,6 +178,7 @@ public class DrawController {
     }
 
     public void onNew(ActionEvent actionEvent) {
+        if (!myHTTPConnect.isManager) return;
         if (confirmSave()) return;
 
         // Reset attributes
@@ -196,6 +201,7 @@ public class DrawController {
     }
 
     public void onOpen(ActionEvent actionEvent) {
+        if (!myHTTPConnect.isManager) return;
         // Open a new workspace
         onNew(actionEvent);
 
@@ -283,10 +289,12 @@ public class DrawController {
     }
 
     public void onSave(ActionEvent actionEvent) {
+        if (!myHTTPConnect.isManager) return;
         save();
     }
 
     public void onSaveAs(ActionEvent actionEvent) {
+        if (!myHTTPConnect.isManager) return;
         saveAs();
     }
 
@@ -306,6 +314,14 @@ public class DrawController {
 
     @FXML
     private void initialize() {
+
+        /// CHAT INITIALIZE PARTS ///
+        messages.add(new Label(""));
+        // TODO: Insert some getName here, so user knows what their name is.
+
+
+        /// SESSION INITIALIZE PARTS ///
+        //receiveUser("Me");
         // On exit handler
         // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
         drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
@@ -436,6 +452,13 @@ public class DrawController {
             startY = endY = event.getY();
 
             cleanSnapshot = drawCanvas.snapshot(null, cleanSnapshot);
+            //Stop Update
+//            try {
+//                myHTTPConnect.updateThread.wait();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
 
         });
 
@@ -612,6 +635,7 @@ public class DrawController {
                     break;
                 }
             }
+            //myHTTPConnect.updateThread.notify();
         });
     }
 
@@ -660,5 +684,114 @@ public class DrawController {
         System.out.println("Stop Update");
         App.setRoot("login");
 
+    }
+
+
+    ////// SESSION CONTROLS //////
+
+    @FXML
+    private VBox userList = new VBox();
+
+    @FXML
+    private Button kickButton;
+
+    private List<Button> users = new ArrayList<>();
+
+
+
+    public void clearUsers(){
+        userList.getChildren().clear();
+        users.clear();
+    }
+
+    public void receiveUser(String name) {
+        Button user = new Button(name);
+        user.setUserData(name);
+        user.setText(name);
+        user.setId(name);
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e) {
+                kickUser(e);
+            }
+        };
+        user.setOnAction(event);
+        users.add(user);
+        userList.getChildren().add(user);
+    }
+
+    @FXML
+    public void kickUser(ActionEvent event) {
+        Button removed = (Button) event.getSource();
+        String temp = (String) removed.getUserData();
+        if ((temp.equals(myHTTPConnect.username))){
+            return;
+        }
+        removeUser((String) removed.getUserData());
+        // TODO: Send kick to other clients here.
+        myHTTPConnect.deleteActive((String) removed.getUserData());
+    }
+
+    public void removeUser(String name) {
+        users.remove(name);
+        userList.getChildren().remove(userList.lookup("#" + name));
+    }
+
+    public void waitingUser(String name){
+        isBusy = true;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, name + ": Can I join?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait();
+
+
+        if (alert.getResult() == ButtonType.YES) {
+            //Accept
+            myHTTPConnect.registerActive(name);
+        } else if (alert.getResult() == ButtonType.NO){
+            myHTTPConnect.deleteWaitingUsers(name);
+        }
+        isBusy = false;
+    }
+
+    ////// CHAT CONTROL //////
+
+    @FXML
+    private TextArea inputField;
+    @FXML
+    private Button sendButton;
+    @FXML
+    private VBox chatBox = new VBox();
+
+    private List<Label> messages = new ArrayList<>();
+
+    @FXML
+    public void buttonPress(ActionEvent event) {
+        String myMessage = inputField.getText().trim();
+        if (!myMessage.equals("")) {
+            //myMessage = myName + ": \n" + myMessage;
+            sendMessage(myMessage);
+                /*
+                INSERT SEND CHAT MESSAGE TO OTHERS HERE.
+                sendMessage(myMessage);
+                */
+            inputField.clear();
+        }
+    }
+
+
+    public void newMessage(String message) {
+        messages.add(new Label(message));
+    }
+
+    // Displays messages "received" by themselves or by others.
+    public void receiveMessage(String message) {
+        newMessage(message);
+        System.out.println(message);
+        chatBox.getChildren().add(messages.get(messages.size() - 1));
+    }
+
+    // Sends messages to all other clients - would usually put "inputField.getText()" in argument.
+    public void sendMessage(String message) {
+        // TODO: message sending to clients.
+        //System.out.println(myHTTPConnect.username);
+        myHTTPConnect.sendText(message);
     }
 }

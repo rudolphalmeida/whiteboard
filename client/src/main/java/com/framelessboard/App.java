@@ -18,7 +18,6 @@ public class App extends Application {
     private HTTPConnect myHTTPConnect = new HTTPConnect();
 
 
-
     @Override
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("login"));

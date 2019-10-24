@@ -37,10 +37,13 @@ public class HTTPConnect {
     public String currentMananger;
     public JSONArray onlineUserList;
     public JSONArray activeUserList;
+    public JSONArray waitingUserList;
     public boolean isManager = false;
     public int currentCanvas = -1;
     public int currentChat = -1;
 
+
+    private DrawController drawController;
     private Artist artist;
     private Chat chat;
 
@@ -64,6 +67,9 @@ public class HTTPConnect {
 
     public void setArtist(Artist artist) {
         this.artist = artist;
+    }
+    public void setDrawController(DrawController drawController){
+        this.drawController = drawController;
     }
 
     public void setChat(Chat chat) {
@@ -555,11 +561,13 @@ public class HTTPConnect {
             if (response.getStatusLine().getStatusCode() == 200){
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                waitingUserList = content.getJSONArray("result");
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                waitingUserList = null;
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -618,7 +626,7 @@ public class HTTPConnect {
         }
     }
 
-    public void getUserState(){
+    public String getUserState(){
         //To reject some user to be an active user
         try{
             String uri = url + "/userstate";
@@ -630,6 +638,8 @@ public class HTTPConnect {
             if (response.getStatusLine().getStatusCode() == 200){
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 System.out.println(content);
+                String state = content.getString("result");
+                return state;
             }
             else {
                 System.out.print("Status Code:" + response.getStatusLine().getStatusCode());
@@ -641,6 +651,7 @@ public class HTTPConnect {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public JSONArray getChatMessages(){
@@ -725,6 +736,7 @@ public class HTTPConnect {
         return new JSONArray();
     }
 
+
     public void postChatMessages(JSONObject text){
         //To reject some user to be an active user
         try{
@@ -801,7 +813,7 @@ public class HTTPConnect {
     public void sendText(String text){
         JSONObject JSONText = new JSONObject();
         JSONText.put("text", text);
-        JSONText.put("id", username);
+        JSONText.put("username", username);
         System.out.println(JSONText);
         new Thread(() -> {
             postChatMessages(JSONText);
@@ -814,6 +826,12 @@ public class HTTPConnect {
             @Override
             public synchronized void run() {
                 while (stopUpdate){
+                    //Check if active
+                    String state = getUserState();
+                    if (state.equals("kicked")){
+
+                    }
+
                     //Updat Canvas
                     JSONArray canvasResult = null;
                     if (currentCanvas == -1){
@@ -855,9 +873,42 @@ public class HTTPConnect {
                             JSONObject chating = chatResult.getJSONObject(i).getJSONObject("request");
                             currentChat = chatResult.getJSONObject(i).getInt("id");
                             String text = chating.getString("text");
+                            String username = chating.getString("username");
+                            String message = username + ": \n" + text;
+                            Platform.runLater(()-> {
+                                        drawController.receiveMessage(message);
+                                        });
                             //System.out.println(drawing);
                         }
                     }
+
+                    //Update Waiting User
+                    getWaitingUsers();
+                    System.out.println(waitingUserList);
+                    if (!drawController.isBusy){
+                        if (waitingUserList != null && !waitingUserList.isEmpty()){
+
+                            Platform.runLater(()->{
+                                //modify your javafx app here.
+                                for (int i = 0; i < waitingUserList.length(); i++){
+                                    drawController.waitingUser(waitingUserList.getString(i));
+                                    System.out.println(waitingUserList.getString(i));
+                                }
+                            });
+                        }
+                    }
+                    //Update Active User
+                    getActiveUser();
+                    Platform.runLater(()->{
+                        //modify your javafx app here.
+                        drawController.clearUsers();
+                        if (activeUserList.length()>0){
+                            for (int i = 0; i < activeUserList.length(); i++){
+                                drawController.receiveUser(activeUserList.getString(i));
+                            }
+                        }
+                    });
+
 
                     //Wait for 500ms
                     try {
@@ -915,7 +966,16 @@ public class HTTPConnect {
     public static void main( String[] args ){
         HTTPConnect myHTTPConnect = new HTTPConnect();
         myHTTPConnect.establishConnect("abc");
-        //myHTTPConnect.postCanvas();
+        //myHTTPConnect.deleteCanvas();
+        myHTTPConnect.postCanvas();
+
+        myHTTPConnect.deleteWaitingUsers("lksdfjadkls;jfdsakl;jfdalsjf");
+        myHTTPConnect.deleteWaitingUsers("bc");
+        System.out.println(myHTTPConnect.getUserState());
+        myHTTPConnect.getActiveUser();
+        System.out.println(myHTTPConnect.activeUserList);
+        myHTTPConnect.getWaitingUsers();
+        System.out.println(myHTTPConnect.waitingUserList);
 //        myHTTPConnect.getCanvas(0);
 //        JSONObject testJSON = new JSONObject();
 //        testJSON.put("Object", "IMAGE");
@@ -936,7 +996,7 @@ public class HTTPConnect {
 //            e.printStackTrace();
 //        }
 //        myHTTPConnect.postChatMessages(testJSON);
-        myHTTPConnect.getChatMessages();
+        //myHTTPConnect.getChatMessages(0);
 
         //myHTTPConnect.deleteCanvas();
 

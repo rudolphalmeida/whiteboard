@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class LoginController {
@@ -21,6 +22,9 @@ public class LoginController {
 
     @FXML
     TextField userName;
+
+    @FXML
+    Text displayMessage;
 
     public void setMyHTTPConnect(HTTPConnect myHTTPConnect){
         System.out.println("Start");
@@ -36,33 +40,39 @@ public class LoginController {
             userName.clear();
         }
 
+        displayMessage.setText("Waiting for a response.");
+
         myHTTPConnect = new HTTPConnect();
         myHTTPConnect.establishConnect("abc");
-
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(App.class.getResource("draw.fxml"));
-        Parent p = loader.load();
-        DrawController drawController = loader.getController();
-        myHTTPConnect.setArtist(drawController.getArtist());
-        drawController.setMyHTTPConnect(myHTTPConnect);
-
-
-        FXMLLoader loader2 = new FXMLLoader();
-        loader2.setLocation(App.class.getResource("chat.fxml"));
-        Parent p2 = loader2.load();
-        Chat chatController = loader2.getController();
-        myHTTPConnect.setChat(chatController);
-        chatController.setMyHTTPConnect(myHTTPConnect);
+        if (myHTTPConnect.token == null) {
+            displayMessage.setText("ERROR: No server.");
+        }
+        else {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(App.class.getResource("draw.fxml"));
+            Parent p = loader.load();
+            DrawController drawController = loader.getController();
+            myHTTPConnect.setArtist(drawController.getArtist());
+            drawController.setMyHTTPConnect(myHTTPConnect);
 
 
-        drawController.startUpdateThread();
+            FXMLLoader loader2 = new FXMLLoader();
+            loader2.setLocation(App.class.getResource("chat.fxml"));
+            Parent p2 = loader2.load();
+            Chat chatController = loader2.getController();
+            myHTTPConnect.setChat(chatController);
+            chatController.setMyHTTPConnect(myHTTPConnect);
 
-        Stage stage = (Stage) loginButton.getScene().getWindow();
-        Scene scene = new Scene(p);
-        Scene scene2 = new Scene(p2);
-        stage.setScene(scene);
-        //stage.setScene(scene2);
+
+            drawController.startUpdateThread();
+
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(p);
+            Scene scene2 = new Scene(p2);
+            stage.setScene(scene);
+            //stage.setScene(scene2);
+        }
     }
-    
-     */
+    */
+
 }

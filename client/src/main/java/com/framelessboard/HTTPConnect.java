@@ -366,7 +366,9 @@ public class HTTPConnect {
             CloseableHttpResponse response = httpclient.execute(request);
             if (response.getStatusLine().getStatusCode() == 200) {
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                content.get("result");
+                if (content.get("result").equals("null")) {
+                    return new JSONArray();
+                }
                 JSONArray result = content.getJSONArray("result");
                 if (result.length() != 0) {
                     return result;
@@ -570,7 +572,9 @@ public class HTTPConnect {
             CloseableHttpResponse response = httpclient.execute(request);
             if (response.getStatusLine().getStatusCode() == 200) {
                 JSONObject content = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-                content.get("result");
+                if (content.get("result").equals("null")) {
+                    return new JSONArray();
+                }
                 JSONArray result = content.getJSONArray("result");
                 if (result.length() != 0) {
                     return result;
@@ -679,7 +683,7 @@ public class HTTPConnect {
                         }
                     }
 
-                    //Updat Canvas
+                    //Update Canvas
                     JSONArray canvasResult = null;
                     if (currentCanvas == -1) {
                         canvasResult = getCanvas();

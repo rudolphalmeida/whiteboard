@@ -623,7 +623,7 @@ public class HTTPConnect {
         if (isManager) {
             //Register self as active
             registerActive(username);
-            postCanvas();
+            //postCanvas();
         } else {
             //Send waiting request
             postWaitingUsers();

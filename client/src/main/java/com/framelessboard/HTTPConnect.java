@@ -2,6 +2,7 @@ package com.framelessboard;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
@@ -674,8 +675,13 @@ public class HTTPConnect {
                 while (!stopUpdate) {
                     //Check if active
                     String state = getUserState();
-                    if (state.equals("kicked") | state.equals("rejected")) {
+                    if (!state.equals("active")) {
                         try {
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setContentText("You were kicked!");
+                                alert.show();
+                            });
                             drawController.switchToLogin();
                         } catch (IOException e) {
                             e.printStackTrace();

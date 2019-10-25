@@ -590,7 +590,6 @@ public class HTTPConnect {
         return new JSONArray();
     }
 
-
     public void postChatMessages(JSONObject text) {
         //To reject some user to be an active user
         try {

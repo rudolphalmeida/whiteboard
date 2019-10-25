@@ -254,6 +254,7 @@ public class DrawController {
     private boolean fileSelectError = false;
 
     private void save() {
+        if (!httpConnect.isManager) return;
         if (modifiedAfterLastSave && !fileSelectError) {
             if (file != null) {
                 try {
@@ -278,6 +279,7 @@ public class DrawController {
     }
 
     private void saveAs() {
+        if (!httpConnect.isManager) return;
         if (modifiedAfterLastSave) {
             // Create file chooser with only PNG file selection
             FileChooser fileChooser = new FileChooser();

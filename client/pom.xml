@@ -78,7 +78,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        org.framelessboard.App
+                                        com.framelessboard.App
                                     </mainClass>
                                 </manifest>
                             </archive>
@@ -88,6 +88,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.8.3</version>
+                <configuration>
+                    <mainClass>com.framelessboard.App</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

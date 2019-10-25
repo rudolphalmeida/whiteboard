@@ -1,20 +1,15 @@
 package com.framelessboard;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.text.Text;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class LoginController {
@@ -119,7 +114,7 @@ public class LoginController {
         DrawController drawController = loader.getController();
         myHTTPConnect.setArtist(drawController.getArtist());
         myHTTPConnect.setDrawController(drawController);
-        drawController.setMyHTTPConnect(myHTTPConnect);
+        drawController.setHttpConnect(myHTTPConnect);
 
 
 

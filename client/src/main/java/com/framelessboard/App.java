@@ -14,24 +14,24 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Scene scene;
-
-    private HTTPConnect myHTTPConnect = new HTTPConnect();
-
+    private static Stage stage;
 
     @Override
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("login"));
         stage.setTitle("FramelessBoard");
-        //stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
 
-    static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
-    }
+//    @Override
+//    public void stop() {
+//        httpConnect.deleteCanvas();
+//        httpConnect.stopUpdateThread();
+//        save();
+//    }
 
-    private static Parent loadFXML(String fxml) throws IOException {
+    static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }

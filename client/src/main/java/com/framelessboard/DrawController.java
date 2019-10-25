@@ -16,14 +16,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,17 +35,16 @@ public class DrawController {
 
     boolean isBusy = false;
 
-    public HTTPConnect myHTTPConnect;
+    public HTTPConnect httpConnect;
 
-    public void setMyHTTPConnect(HTTPConnect myHTTPConnect){
-        this.myHTTPConnect = myHTTPConnect;
+    public void setHttpConnect(HTTPConnect httpConnect) {
+        this.httpConnect = httpConnect;
     }
 
-    public void startUpdateThread(){
-        myHTTPConnect.updateThread =  myHTTPConnect.getUpdateThread();
-        this.myHTTPConnect.updateThread.start();
+    public void startUpdateThread() {
+        httpConnect.updateThread = httpConnect.getUpdateThread();
+        this.httpConnect.updateThread.start();
     }
-
 
     private ArrayList<Double> pointBuffer = new ArrayList<Double>();
 
@@ -98,7 +93,7 @@ public class DrawController {
     private GraphicsContext gc;
     private Artist artist;
 
-    public Artist getArtist(){
+    public Artist getArtist() {
         return artist;
     }
 
@@ -180,10 +175,8 @@ public class DrawController {
     }
 
     public void onNew(ActionEvent actionEvent) {
-        if (!myHTTPConnect.isManager) return;
+        if (!httpConnect.isManager) return;
         if (confirmSave()) return;
-
-
 
         // Reset attributes
         file = null;
@@ -201,21 +194,18 @@ public class DrawController {
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
 
         System.out.println("Stop Update");
-        myHTTPConnect.stopUpdateThread();
+        httpConnect.stopUpdateThread();
 
-        myHTTPConnect.deleteCanvas();
-        myHTTPConnect.reconnect();
-        myHTTPConnect.postCanvas();
+        httpConnect.deleteCanvas();
+        httpConnect.reconnect();
+        httpConnect.postCanvas();
 
         // Reset canvas
         artist.clearCanvas();
-
-
     }
 
     public void onOpen(ActionEvent actionEvent) {
-        if (!myHTTPConnect.isManager) return;
-
+        if (!httpConnect.isManager) return;
 
         // Open a new workspace
         onNew(actionEvent);
@@ -237,21 +227,20 @@ public class DrawController {
         CustomAction imageAction = new CustomAction("IMAGE", file);
 
         System.out.println("Stop Update");
-        myHTTPConnect.stopUpdateThread();
+        httpConnect.stopUpdateThread();
 
         System.out.println("PostCanvas");
-        myHTTPConnect.deleteCanvas();
-        myHTTPConnect.registerActive(myHTTPConnect.username);
-        myHTTPConnect.reconnect();
-        myHTTPConnect.postCanvas();
-        myHTTPConnect.sendCanvas(imageAction.getAction());
-
-
-        //artist.drawImage(image);
+        httpConnect.deleteCanvas();
+        httpConnect.registerActive(httpConnect.username);
+        httpConnect.reconnect();
+        httpConnect.postCanvas();
+        httpConnect.sendCanvas(imageAction.getAction());
     }
 
     public void onClose(ActionEvent actionEvent) {
         if (confirmSave()) return;
+
+        httpConnect.stopUpdateThread();
 
         file = null;
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -261,8 +250,8 @@ public class DrawController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (myHTTPConnect.isManager){
-            myHTTPConnect.deleteCanvas();
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
         }
     }
 
@@ -311,20 +300,31 @@ public class DrawController {
     }
 
     public void onSave(ActionEvent actionEvent) {
-        if (!myHTTPConnect.isManager) return;
+        if (!httpConnect.isManager) return;
         save();
     }
 
     public void onSaveAs(ActionEvent actionEvent) {
-        if (!myHTTPConnect.isManager) return;
+        if (!httpConnect.isManager) return;
         saveAs();
     }
 
     public void onQuit(ActionEvent actionEvent) {
         if (confirmSave()) return;
 
+        httpConnect.stopUpdateThread();
+
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.close();
+    }
+
+    public void onFileMenuClick(ActionEvent event) {
+        if (!httpConnect.isManager) {
+            menuSave.setDisable(true);
+            menuSaveAs.setDisable(true);
+            menuOpen.setDisable(true);
+            menuNew.setDisable(true);
+        }
     }
 
     // Coordinates for drawing
@@ -339,28 +339,14 @@ public class DrawController {
 
         /// CHAT INITIALIZE PARTS ///
         messages.add(new Label(""));
-        // TODO: Insert some getName here, so user knows what their name is.
-
-
-        /// SESSION INITIALIZE PARTS ///
-        //receiveUser("Me");
-        // On exit handler
-        // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
-        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
-            if (oldScene == null && newScene != null) {
-                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> newWindow.setOnCloseRequest(event -> {
-                    save();
-                })));
-            }
-        }));
 
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
         menuNew.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         menuSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN));
+        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
         menuClose.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
         menuQuit.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHIFT_DOWN));
-        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 
         // ToggleGroup allows us to only select one object from the draw tools
@@ -409,9 +395,9 @@ public class DrawController {
                 case TEXT: {
 
                     //artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
-                    action = new CustomAction("TEXT", drawColor.getValue().toString(), x, y,textToDrawInput.getText(), strokeWidthInput.getValue());
+                    action = new CustomAction("TEXT", drawColor.getValue().toString(), x, y, textToDrawInput.getText(), strokeWidthInput.getValue());
                     //artist.drawJSONText(action.getAction().getJSONObject("Action"));
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -421,13 +407,11 @@ public class DrawController {
                 case ERASER: {
                     //artist.erase(x, y, strokeWidthInput.getValue());
 
-
                     pointBuffer.add(x);
                     pointBuffer.add(y);
                     action = new CustomAction("ERASER", Color.WHITE.toString(), strokeWidthInput.getValue(), pointBuffer);
                     pointBuffer.clear();
-                    myHTTPConnect.sendCanvas(action.getAction());
-
+                    httpConnect.sendCanvas(action.getAction());
 
 
                     modifiedAfterLastSave = true;
@@ -443,7 +427,7 @@ public class DrawController {
 
                     action = new CustomAction("FREEHAND", drawColor.getValue().toString(), strokeWidthInput.getValue(), pointBuffer);
                     pointBuffer.clear();
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -453,8 +437,7 @@ public class DrawController {
                 case FILL: {
                     //artist.floodFill(x, y, drawColor.getValue());
                     action = new CustomAction("FILL", drawColor.getValue().toString(), x, y);
-                    myHTTPConnect.sendCanvas((action.getAction()));
-
+                    httpConnect.sendCanvas((action.getAction()));
 
 
                     modifiedAfterLastSave = true;
@@ -591,11 +574,11 @@ public class DrawController {
                 case ERASER:
                     action = new CustomAction("ERASER", Color.WHITE.toString(), strokeWidthInput.getValue(), pointBuffer);
                     pointBuffer.clear();
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
                 case FREEHAND:
                     action = new CustomAction("FREEHAND", drawColor.getValue().toString(), strokeWidthInput.getValue(), pointBuffer);
                     pointBuffer.clear();
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
                 case FILL:
                     break;
                 case CIRCLE: {
@@ -604,8 +587,8 @@ public class DrawController {
                     double radius = distance(startX, startY, outerX, outerY);
 
                     //artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
-                    action = new CustomAction("CIRCLE", drawColor.getValue().toString(),startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    action = new CustomAction("CIRCLE", drawColor.getValue().toString(), startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -615,7 +598,7 @@ public class DrawController {
                 case LINE: {
                     //artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
                     action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, strokeWidthInput.getValue());
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 
@@ -632,7 +615,7 @@ public class DrawController {
                     //artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
                     //System.out.println(action.getAction());
-                    myHTTPConnect.sendCanvas(action.getAction());
+                    httpConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
@@ -648,7 +631,7 @@ public class DrawController {
 
                     //artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("ELLIPSE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, toggleFilling.isSelected(), strokeWidthInput.getValue());
-                    myHTTPConnect.putCanvas(action.getAction());
+                    httpConnect.putCanvas(action.getAction());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -698,15 +681,11 @@ public class DrawController {
         return Math.hypot(ac, cb);
     }
 
-
-
     @FXML
-    public void switchToLogin() throws IOException {
-        myHTTPConnect.stopUpdateThread();
-        System.out.println("Stop Update");
-        App.setRoot("login");
+    void switchToLogin() throws IOException {
+        httpConnect.stopUpdateThread();
+        drawCanvas.getScene().setRoot(App.loadFXML("login"));
     }
-
 
     ////// SESSION CONTROLS //////
 
@@ -719,45 +698,41 @@ public class DrawController {
     private List<Button> users = new ArrayList<>();
 
 
-
-    public void clearUsers(){
+    void clearUsers() {
         userList.getChildren().clear();
         users.clear();
     }
 
-    public void receiveUser(String name) {
+    void receiveUser(String name) {
         Button user = new Button(name);
         user.setUserData(name);
         user.setText(name);
         user.setId(name);
-        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>(){
-            public void handle(ActionEvent e) {
-                kickUser(e);
-            }
-        };
+        user.setMaxWidth(Double.MAX_VALUE);
+        EventHandler<ActionEvent> event = this::kickUser;
         user.setOnAction(event);
         users.add(user);
         userList.getChildren().add(user);
     }
 
     @FXML
-    public void kickUser(ActionEvent event) {
+    private void kickUser(ActionEvent event) {
         Button removed = (Button) event.getSource();
         String temp = (String) removed.getUserData();
-        if ((temp.equals(myHTTPConnect.username))){
+        if ((temp.equals(httpConnect.username)) && !httpConnect.isManager) {
             return;
         }
         removeUser((String) removed.getUserData());
         // TODO: Send kick to other clients here.
-        myHTTPConnect.deleteActive((String) removed.getUserData());
+        httpConnect.deleteActive((String) removed.getUserData());
     }
 
-    public void removeUser(String name) {
+    private void removeUser(String name) {
         users.remove(name);
         userList.getChildren().remove(userList.lookup("#" + name));
     }
 
-    public void waitingUser(String name){
+    void waitingUser(String name) {
         isBusy = true;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, name + ": Can I join?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
@@ -765,9 +740,9 @@ public class DrawController {
 
         if (alert.getResult() == ButtonType.YES) {
             //Accept
-            myHTTPConnect.registerActive(name);
-        } else if (alert.getResult() == ButtonType.NO){
-            myHTTPConnect.deleteWaitingUsers(name);
+            httpConnect.registerActive(name);
+        } else if (alert.getResult() == ButtonType.NO) {
+            httpConnect.deleteWaitingUsers(name);
         }
         isBusy = false;
     }
@@ -798,21 +773,21 @@ public class DrawController {
     }
 
 
-    public void newMessage(String message) {
+    private void newMessage(String message) {
         messages.add(new Label(message));
     }
 
     // Displays messages "received" by themselves or by others.
-    public void receiveMessage(String message) {
+    void receiveMessage(String message) {
         newMessage(message);
         System.out.println(message);
         chatBox.getChildren().add(messages.get(messages.size() - 1));
     }
 
     // Sends messages to all other clients - would usually put "inputField.getText()" in argument.
-    public void sendMessage(String message) {
+    private void sendMessage(String message) {
         // TODO: message sending to clients.
         //System.out.println(myHTTPConnect.username);
-        myHTTPConnect.sendText(message);
+        httpConnect.sendText(message);
     }
 }

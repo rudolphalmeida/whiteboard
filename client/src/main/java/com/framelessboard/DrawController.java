@@ -2,6 +2,7 @@ package com.framelessboard;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +12,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -19,6 +21,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DrawController {
 
@@ -28,6 +32,22 @@ public class DrawController {
     public MenuItem menuSaveAs;
     public MenuItem menuQuit;
     public MenuItem menuOpen;
+
+    boolean isBusy = false;
+
+    private HTTPConnect httpConnect;
+
+    void setHttpConnect(HTTPConnect httpConnect) {
+        this.httpConnect = httpConnect;
+    }
+
+    void startUpdateThread() {
+        httpConnect.updateThread = httpConnect.getUpdateThread();
+        this.httpConnect.updateThread.start();
+    }
+
+    private ArrayList<Double> pointBuffer = new ArrayList<>();
+
 
     @FXML
     private ToggleButton rectangleToggle;
@@ -72,6 +92,10 @@ public class DrawController {
 
     private GraphicsContext gc;
     private Artist artist;
+
+    Artist getArtist() {
+        return artist;
+    }
 
     private WritableImage cleanSnapshot = null;
 
@@ -151,6 +175,7 @@ public class DrawController {
     }
 
     public void onNew(ActionEvent actionEvent) {
+        if (!httpConnect.isManager) return;
         if (confirmSave()) return;
 
         // Reset attributes
@@ -168,11 +193,19 @@ public class DrawController {
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
 
+        httpConnect.stopUpdateThread();
+
+        httpConnect.deleteCanvas();
+        httpConnect.reconnect();
+        httpConnect.postCanvas();
+
         // Reset canvas
         artist.clearCanvas();
     }
 
     public void onOpen(ActionEvent actionEvent) {
+        if (!httpConnect.isManager) return;
+
         // Open a new workspace
         onNew(actionEvent);
 
@@ -189,7 +222,15 @@ public class DrawController {
         }
 
         Image image = new Image(file.toURI().toString());
-        artist.drawImage(image);
+
+        CustomAction imageAction = new CustomAction("IMAGE", file);
+        httpConnect.stopUpdateThread();
+
+        httpConnect.deleteCanvas();
+        httpConnect.registerActive(httpConnect.username);
+        httpConnect.reconnect();
+        httpConnect.postCanvas();
+        httpConnect.sendCanvas(imageAction.getAction());
     }
 
     public void onClose(ActionEvent actionEvent) {
@@ -203,11 +244,17 @@ public class DrawController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
+        }
+        httpConnect.stopUpdateThread();
     }
 
     private boolean fileSelectError = false;
 
     private void save() {
+        if (!httpConnect.isManager) return;
         if (modifiedAfterLastSave && !fileSelectError) {
             if (file != null) {
                 try {
@@ -232,6 +279,7 @@ public class DrawController {
     }
 
     private void saveAs() {
+        if (!httpConnect.isManager) return;
         if (modifiedAfterLastSave) {
             // Create file chooser with only PNG file selection
             FileChooser fileChooser = new FileChooser();
@@ -250,18 +298,35 @@ public class DrawController {
     }
 
     public void onSave(ActionEvent actionEvent) {
+        if (!httpConnect.isManager) return;
         save();
     }
 
     public void onSaveAs(ActionEvent actionEvent) {
+        if (!httpConnect.isManager) return;
         saveAs();
     }
 
     public void onQuit(ActionEvent actionEvent) {
         if (confirmSave()) return;
 
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
+        }
+        httpConnect.stopUpdateThread();
+
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.close();
+    }
+
+    public void onFileMenuClick(ActionEvent event) {
+        if (!httpConnect.isManager) {
+            menuSave.setDisable(true);
+            menuSaveAs.setDisable(true);
+            menuOpen.setDisable(true);
+            menuNew.setDisable(true);
+        }
     }
 
     // Coordinates for drawing
@@ -273,23 +338,17 @@ public class DrawController {
 
     @FXML
     private void initialize() {
-        // On exit handler
-        // Reference: https://stackoverflow.com/questions/13246211/javafx-how-to-get-stage-from-controller-during-initialization
-        drawCanvas.sceneProperty().addListener(((observableScene, oldScene, newScene) -> {
-            if (oldScene == null && newScene != null) {
-                newScene.windowProperty().addListener(((observableWindow, oldWindow, newWindow) -> newWindow.setOnCloseRequest(event -> {
-                    save();
-                })));
-            }
-        }));
+
+        /// CHAT INITIALIZE PARTS ///
+        messages.add(new Label(""));
 
         // Keyboard shortcuts
         menuSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
         menuNew.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         menuSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN));
+        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
         menuClose.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
         menuQuit.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHIFT_DOWN));
-        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 
         // ToggleGroup allows us to only select one object from the draw tools
@@ -328,7 +387,7 @@ public class DrawController {
             // Get coordinates of click
             double x = event.getX();
             double y = event.getY();
-
+            CustomAction action = null;
             switch (currentTool) {
                 case ELLIPSE:
                 case LINE:
@@ -336,7 +395,11 @@ public class DrawController {
                 case RECTANGLE:
                     break;
                 case TEXT: {
-                    artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
+
+                    //artist.drawText(textToDrawInput.getText(), drawColor.getValue(), x, y, strokeWidthInput.getValue());
+                    action = new CustomAction("TEXT", drawColor.getValue().toString(), x, y, textToDrawInput.getText(), strokeWidthInput.getValue());
+                    //artist.drawJSONText(action.getAction().getJSONObject("Action"));
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -344,7 +407,14 @@ public class DrawController {
                     break;
                 }
                 case ERASER: {
-                    artist.erase(x, y, strokeWidthInput.getValue());
+                    //artist.erase(x, y, strokeWidthInput.getValue());
+
+                    pointBuffer.add(x);
+                    pointBuffer.add(y);
+                    action = new CustomAction("ERASER", Color.WHITE.toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    httpConnect.sendCanvas(action.getAction());
+
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -352,7 +422,14 @@ public class DrawController {
                     break;
                 }
                 case FREEHAND: {
-                    artist.drawFreeHand(x, y, strokeWidthInput.getValue(), drawColor.getValue());
+                    //artist.drawFreeHand(x, y, strokeWidthInput.getValue(), drawColor.getValue());
+
+                    pointBuffer.add(x);
+                    pointBuffer.add(y);
+
+                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -360,7 +437,10 @@ public class DrawController {
                     break;
                 }
                 case FILL: {
-                    artist.floodFill(x, y, drawColor.getValue());
+                    //artist.floodFill(x, y, drawColor.getValue());
+                    action = new CustomAction("FILL", drawColor.getValue().toString(), x, y);
+                    httpConnect.sendCanvas((action.getAction()));
+
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -379,18 +459,30 @@ public class DrawController {
             startY = endY = event.getY();
 
             cleanSnapshot = drawCanvas.snapshot(null, cleanSnapshot);
+            //Stop Update
+//            try {
+//                myHTTPConnect.updateThread.wait();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
 
         });
 
         drawCanvas.setOnMouseDragged(event -> {
             if (currentTool == null) return;
-
+            CustomAction action = null;
             switch (currentTool) {
                 case ERASER:
                     artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
+                    pointBuffer.add(event.getX());
+                    pointBuffer.add(event.getY());
                     break;
                 case FREEHAND:
                     artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    pointBuffer.add(event.getX());
+                    pointBuffer.add(event.getY());
+
                     break;
                 case LINE: {
                     // Restore previous snapshot
@@ -405,6 +497,7 @@ public class DrawController {
                     endY = event.getY();
 
                     artist.drawLine(startX, startY, endX, endY, 1.0, transparentColor);
+
                     break;
                 }
                 case RECTANGLE: {
@@ -473,11 +566,17 @@ public class DrawController {
         // drag exited
         drawCanvas.setOnMouseReleased(event -> {
             if (currentTool == null) return;
-
+            CustomAction action = null;
             switch (currentTool) {
                 case TEXT:
                 case ERASER:
+                    action = new CustomAction("ERASER", Color.WHITE.toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    httpConnect.sendCanvas(action.getAction());
                 case FREEHAND:
+                    action = new CustomAction("FREEHAND", drawColor.getValue().toString(), strokeWidthInput.getValue(), pointBuffer);
+                    pointBuffer.clear();
+                    httpConnect.sendCanvas(action.getAction());
                 case FILL:
                     break;
                 case CIRCLE: {
@@ -485,7 +584,9 @@ public class DrawController {
                     double outerY = event.getY();
                     double radius = distance(startX, startY, outerX, outerY);
 
-                    artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    //artist.drawCircle(startX, startY, radius, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("CIRCLE", drawColor.getValue().toString(), startX, startY, radius, toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    httpConnect.sendCanvas(action.getAction());
 
                     modifiedAfterLastSave = true;
                     Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -493,7 +594,9 @@ public class DrawController {
                     break;
                 }
                 case LINE: {
-                    artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    //artist.drawLine(startX, startY, event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
+                    action = new CustomAction("LINE", drawColor.getValue().toString(), startX, startY, endX, endY, strokeWidthInput.getValue());
+                    httpConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0;
 
@@ -507,7 +610,9 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
+                    httpConnect.sendCanvas(action.getAction());
+
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -520,7 +625,8 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    action = new CustomAction("ELLIPSE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, toggleFilling.isSelected(), strokeWidthInput.getValue());
+                    httpConnect.putCanvas(action.getAction());
                     startX = endX = startY = endY = 0.0; // Reset start and end
 
                     modifiedAfterLastSave = true;
@@ -570,7 +676,114 @@ public class DrawController {
     }
 
     @FXML
-    private void switchToLogin() throws IOException {
-        App.setRoot("login");
+    void switchToLogin() throws IOException {
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
+        }
+
+        httpConnect.stopUpdateThread();
+        drawCanvas.getScene().setRoot(App.loadLoginFXML());
+    }
+
+    ////// SESSION CONTROLS //////
+
+    @FXML
+    private VBox userList = new VBox();
+
+    @FXML
+    private Button kickButton;
+
+    private List<Button> users = new ArrayList<>();
+
+
+    void clearUsers() {
+        userList.getChildren().clear();
+        users.clear();
+    }
+
+    void receiveUser(String name) {
+        Button user = new Button(name);
+        user.setUserData(name);
+        user.setText(name);
+        user.setId(name);
+        user.setMaxWidth(Double.MAX_VALUE);
+        EventHandler<ActionEvent> event = this::kickUser;
+        user.setOnAction(event);
+        users.add(user);
+        userList.getChildren().add(user);
+    }
+
+    @FXML
+    private void kickUser(ActionEvent event) {
+        Button removed = (Button) event.getSource();
+        String temp = (String) removed.getUserData();
+        if ((temp.equals(httpConnect.username)) && !httpConnect.isManager) {
+            return;
+        }
+        removeUser((String) removed.getUserData());
+        // TODO: Send kick to other clients here.
+        httpConnect.deleteActive((String) removed.getUserData());
+    }
+
+    private void removeUser(String name) {
+        users.remove(name);
+        userList.getChildren().remove(userList.lookup("#" + name));
+    }
+
+    void waitingUser(String name) {
+        isBusy = true;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, name + ": Can I join?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait();
+
+
+        if (alert.getResult() == ButtonType.YES) {
+            //Accept
+            httpConnect.registerActive(name);
+        } else if (alert.getResult() == ButtonType.NO) {
+            httpConnect.deleteWaitingUsers(name);
+        }
+        isBusy = false;
+    }
+
+    ////// CHAT CONTROL //////
+
+    @FXML
+    private TextArea inputField;
+    @FXML
+    private Button sendButton;
+    @FXML
+    private VBox chatBox = new VBox();
+
+    private List<Label> messages = new ArrayList<>();
+
+    @FXML
+    public void buttonPress(ActionEvent event) {
+        String myMessage = inputField.getText().trim();
+        if (!myMessage.equals("")) {
+            //myMessage = myName + ": \n" + myMessage;
+            sendMessage(myMessage);
+                /*
+                INSERT SEND CHAT MESSAGE TO OTHERS HERE.
+                sendMessage(myMessage);
+                */
+            inputField.clear();
+        }
+    }
+
+
+    private void newMessage(String message) {
+        messages.add(new Label(message));
+    }
+
+    // Displays messages "received" by themselves or by others.
+    void receiveMessage(String message) {
+        newMessage(message);
+        chatBox.getChildren().add(messages.get(messages.size() - 1));
+    }
+
+    // Sends messages to all other clients - would usually put "inputField.getText()" in argument.
+    private void sendMessage(String message) {
+        httpConnect.sendText(message);
     }
 }

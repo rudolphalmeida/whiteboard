@@ -27,6 +27,7 @@ public class App extends Application {
 //    @Override
 //    public void stop() {
 //        httpConnect.deleteCanvas();
+    // httpConnect.deleteManager();
 //        httpConnect.stopUpdateThread();
 //        save();
 //    }

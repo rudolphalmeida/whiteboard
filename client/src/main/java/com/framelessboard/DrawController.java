@@ -35,13 +35,13 @@ public class DrawController {
 
     boolean isBusy = false;
 
-    public HTTPConnect httpConnect;
+    private HTTPConnect httpConnect;
 
-    public void setHttpConnect(HTTPConnect httpConnect) {
+    void setHttpConnect(HTTPConnect httpConnect) {
         this.httpConnect = httpConnect;
     }
 
-    public void startUpdateThread() {
+    void startUpdateThread() {
         httpConnect.updateThread = httpConnect.getUpdateThread();
         this.httpConnect.updateThread.start();
     }
@@ -93,7 +93,7 @@ public class DrawController {
     private GraphicsContext gc;
     private Artist artist;
 
-    public Artist getArtist() {
+    Artist getArtist() {
         return artist;
     }
 
@@ -240,8 +240,6 @@ public class DrawController {
     public void onClose(ActionEvent actionEvent) {
         if (confirmSave()) return;
 
-        httpConnect.stopUpdateThread();
-
         file = null;
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
@@ -252,7 +250,9 @@ public class DrawController {
         }
         if (httpConnect.isManager) {
             httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
         }
+        httpConnect.stopUpdateThread();
     }
 
     private boolean fileSelectError = false;
@@ -312,6 +312,10 @@ public class DrawController {
     public void onQuit(ActionEvent actionEvent) {
         if (confirmSave()) return;
 
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
+        }
         httpConnect.stopUpdateThread();
 
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
@@ -683,6 +687,11 @@ public class DrawController {
 
     @FXML
     void switchToLogin() throws IOException {
+        if (httpConnect.isManager) {
+            httpConnect.deleteCanvas();
+            httpConnect.deleteManager();
+        }
+
         httpConnect.stopUpdateThread();
         drawCanvas.getScene().setRoot(App.loadFXML("login"));
     }

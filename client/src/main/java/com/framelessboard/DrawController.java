@@ -718,7 +718,7 @@ public class DrawController {
     private void kickUser(ActionEvent event) {
         Button removed = (Button) event.getSource();
         String temp = (String) removed.getUserData();
-        if ((temp.equals(httpConnect.username)) && !httpConnect.isManager) {
+        if ((temp.equals(httpConnect.username)) || !httpConnect.isManager) {
             return;
         }
         removeUser((String) removed.getUserData());

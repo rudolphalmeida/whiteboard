@@ -128,17 +128,17 @@
                 </TitledPane>
                 <TitledPane text="Chat">
                   <content>
-                    <AnchorPane id="chatPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <VBox prefHeight="285.0" prefWidth="211.0" xmlns="http://javafx.com/javafx/2.2" xmlns:fx="http://javafx.com/fxml/1">
+                    <AnchorPane id="chatPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="248.0" prefWidth="211.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/2.2" xmlns:fx="http://javafx.com/fxml/1">
                         <children>
-                          <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                          <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="200.0">
                             <content>
-                              <VBox fx:id="chatBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" />
+                              <VBox fx:id="chatBox" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="2000.0" />
                             </content>
                           </ScrollPane>
-                          <HBox prefHeight="100.0" prefWidth="200.0">
+                          <HBox alignment="BOTTOM_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="48.0" prefWidth="211.0">
                             <children>
-                              <TextArea fx:id="inputField" prefHeight="93.0" prefWidth="140.0" wrapText="true" />
+                              <TextArea fx:id="inputField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="48.0" prefWidth="161.0" wrapText="true" />
                               <Button fx:id="sendButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonPress" prefHeight="93.0" prefWidth="71.0" text="Send" />
                             </children>
                           </HBox>

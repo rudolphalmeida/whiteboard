@@ -46,7 +46,7 @@ public class DrawController {
         this.httpConnect.updateThread.start();
     }
 
-    private ArrayList<Double> pointBuffer = new ArrayList<Double>();
+    private ArrayList<Double> pointBuffer = new ArrayList<>();
 
 
     @FXML

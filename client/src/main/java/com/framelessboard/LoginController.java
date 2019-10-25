@@ -14,7 +14,8 @@ import javafx.stage.Stage;
 
 public class LoginController {
 
-    public HTTPConnect myHTTPConnect;
+    private HTTPConnect httpConnect;
+
     @FXML
     Button loginButton;
 
@@ -25,11 +26,9 @@ public class LoginController {
     Label displayMessage;
 
 
-
-
     public void initialize() {
 
-        EventHandler<javafx.event.ActionEvent> event = new EventHandler<javafx.event.ActionEvent>(){
+        EventHandler<javafx.event.ActionEvent> event = new EventHandler<javafx.event.ActionEvent>() {
             public void handle(ActionEvent e) {
                 //displayMessage.setText("Waiting.");
                 try {
@@ -44,12 +43,10 @@ public class LoginController {
 
     }
 
-    public void setMyHTTPConnect(HTTPConnect myHTTPConnect){
+    public void setHttpConnect(HTTPConnect httpConnect) {
         System.out.println("Start");
-        this.myHTTPConnect = myHTTPConnect;
+        this.httpConnect = httpConnect;
     }
-
-
 
 
     @FXML
@@ -58,11 +55,10 @@ public class LoginController {
 
         String myUserName = null;
         if (!field.equals("")) {
-            if (field.matches("^[a-zA-Z0-9]*$")){
+            if (field.matches("^[a-zA-Z0-9]*$")) {
                 myUserName = field;
                 userName.clear();
-            }
-            else{
+            } else {
                 userName.clear();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setContentText("Illegal name.");
@@ -72,51 +68,43 @@ public class LoginController {
 
         }
 
-
-
-
-        myHTTPConnect = new HTTPConnect();
+        httpConnect = new HTTPConnect();
         System.out.println(myUserName);
-        myHTTPConnect.establishConnect(myUserName);
+        httpConnect.establishConnect(myUserName);
 
 
         //If cannot get the access token
-        if (myHTTPConnect.token == null){
+        if (httpConnect.token == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setContentText("Error: Cannot get access token. Check Server");
             alert.show();
             return;
         }
 
-
-        String state = myHTTPConnect.getUserState();
+        String state = httpConnect.getUserState();
         System.out.println(state);
-        while (!(state.equals("active"))){
-            if (state.equals("rejected")){
+        while (!(state.equals("active"))) {
+            if (state.equals("rejected")) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setContentText("Manager reject your request");
                 alert.show();
                 return;
             }
-            state = myHTTPConnect.getUserState();
-            try{
+            state = httpConnect.getUserState();
+            try {
                 TimeUnit.SECONDS.sleep(1);
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(App.class.getResource("draw.fxml"));
         Parent p = loader.load();
         DrawController drawController = loader.getController();
-        myHTTPConnect.setArtist(drawController.getArtist());
-        myHTTPConnect.setDrawController(drawController);
-        drawController.setHttpConnect(myHTTPConnect);
-
-
+        httpConnect.setArtist(drawController.getArtist());
+        httpConnect.setDrawController(drawController);
+        drawController.setHttpConnect(httpConnect);
 
         drawController.startUpdateThread();
 

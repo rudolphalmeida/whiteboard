@@ -193,7 +193,6 @@ public class DrawController {
         Stage stage = (Stage) drawCanvas.getScene().getWindow();
         stage.setTitle("FramelessBoard - " + (file != null ? file : "") + "");
 
-        System.out.println("Stop Update");
         httpConnect.stopUpdateThread();
 
         httpConnect.deleteCanvas();
@@ -225,11 +224,8 @@ public class DrawController {
         Image image = new Image(file.toURI().toString());
 
         CustomAction imageAction = new CustomAction("IMAGE", file);
-
-        System.out.println("Stop Update");
         httpConnect.stopUpdateThread();
 
-        System.out.println("PostCanvas");
         httpConnect.deleteCanvas();
         httpConnect.registerActive(httpConnect.username);
         httpConnect.reconnect();
@@ -477,15 +473,11 @@ public class DrawController {
             switch (currentTool) {
                 case ERASER:
                     artist.erase(event.getX(), event.getY(), strokeWidthInput.getValue());
-                    //action = new CustomAction("ERASER", event.getX(), event.getY(), strokeWidthInput.getValue());
-                    //System.out.println(action.getAction());
                     pointBuffer.add(event.getX());
                     pointBuffer.add(event.getY());
                     break;
                 case FREEHAND:
                     artist.drawFreeHand(event.getX(), event.getY(), strokeWidthInput.getValue(), drawColor.getValue());
-                    //action = new CustomAction("FREEHAND", drawColor.getValue().toString(), event.getX(), event.getY(), strokeWidthInput.getValue());
-                    //System.out.println(action.getAction());
                     pointBuffer.add(event.getX());
                     pointBuffer.add(event.getY());
 
@@ -616,9 +608,7 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    //artist.drawRectangle(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("RECTANGLE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, strokeWidthInput.getValue(), toggleFilling.isSelected());
-                    //System.out.println(action.getAction());
                     httpConnect.sendCanvas(action.getAction());
 
                     startX = endX = startY = endY = 0.0; // Reset start and end
@@ -633,7 +623,6 @@ public class DrawController {
                     endY = event.getY();
                     alignStartEnd();
 
-                    //artist.drawEllipse(startX, startY, endX - startX, endY - startY, drawColor.getValue(), toggleFilling.isSelected(), strokeWidthInput.getValue());
                     action = new CustomAction("ELLIPSE", drawColor.getValue().toString(), startX, startY, endX - startX, endY - startY, toggleFilling.isSelected(), strokeWidthInput.getValue());
                     httpConnect.putCanvas(action.getAction());
                     startX = endX = startY = endY = 0.0; // Reset start and end
@@ -644,7 +633,6 @@ public class DrawController {
                     break;
                 }
             }
-            //myHTTPConnect.updateThread.notify();
         });
     }
 
@@ -693,7 +681,7 @@ public class DrawController {
         }
 
         httpConnect.stopUpdateThread();
-        drawCanvas.getScene().setRoot(App.loadFXML("login"));
+        drawCanvas.getScene().setRoot(App.loadLoginFXML());
     }
 
     ////// SESSION CONTROLS //////
@@ -789,14 +777,11 @@ public class DrawController {
     // Displays messages "received" by themselves or by others.
     void receiveMessage(String message) {
         newMessage(message);
-        System.out.println(message);
         chatBox.getChildren().add(messages.get(messages.size() - 1));
     }
 
     // Sends messages to all other clients - would usually put "inputField.getText()" in argument.
     private void sendMessage(String message) {
-        // TODO: message sending to clients.
-        //System.out.println(myHTTPConnect.username);
         httpConnect.sendText(message);
     }
 }

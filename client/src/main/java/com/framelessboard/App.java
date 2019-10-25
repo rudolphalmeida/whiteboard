@@ -13,27 +13,16 @@ import java.io.IOException;
  */
 public class App extends Application {
 
-    private static Scene scene;
-    private static Stage stage;
-
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("login"));
+        Scene scene = new Scene(loadLoginFXML());
         stage.setTitle("FramelessBoard");
         stage.setScene(scene);
         stage.show();
     }
 
-//    @Override
-//    public void stop() {
-//        httpConnect.deleteCanvas();
-    // httpConnect.deleteManager();
-//        httpConnect.stopUpdateThread();
-//        save();
-//    }
-
-    static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+    static Parent loadLoginFXML() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("login" + ".fxml"));
         return fxmlLoader.load();
     }
 

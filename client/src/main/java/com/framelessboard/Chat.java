@@ -20,10 +20,10 @@ public class Chat {
     public String myName = "REY";
 
 
-    public HTTPConnect myHTTPConnect;
+    public HTTPConnect httpConnect;
 
-    public void setMyHTTPConnect(HTTPConnect myHTTPConnect){
-        this.myHTTPConnect = myHTTPConnect;
+    public void setHttpConnect(HTTPConnect httpConnect){
+        this.httpConnect = httpConnect;
     }
 
 
@@ -66,6 +66,6 @@ public class Chat {
     public void sendMessage(String message) {
         // TODO: message sending to clients.
         //myHTTPConnect.sendText(message);
-        System.out.println(myHTTPConnect.username);
+        System.out.println(httpConnect.username);
     }
 }
